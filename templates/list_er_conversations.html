@@ -18,7 +18,7 @@
                     {{ loop.index }} - 
                     {{ c.datetime }} - <!--.strftime('%Y-%m-%d') -->
                     {{ c.len }} - 
-                    <a href="{{ c.filepath }}" target="_blank">LINK</a>
+                    <a href="/er_bot_get_conversation?conv_id={{ c.filepath }}" target="_blank">LINK</a>
                 </div>
             {% endfor %}
             

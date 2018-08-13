@@ -32,6 +32,18 @@ app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
 
 db = SQLAlchemy(app)
 
+class EventLog(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	conv_id = db.Column(db.String(80))
+	event = db.Column(db.String(1024))
+	timestamp = db.Column(db.DateTime())
+	
+	def __init__(self, conv_id, event):
+		self.conv_id = conv_id
+		self.event = event
+		self.timestamp = pstnow()
+
+
 def pretty_print_POST(req):
 	"""
 	At this point it is completely built and ready
