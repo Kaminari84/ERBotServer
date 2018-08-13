@@ -43,6 +43,14 @@ class EventLog(db.Model):
 		self.event = event
 		self.timestamp = pstnow()
 
+def utcnow():
+    return datetime.now(tz=pytz.utc)
+
+def pstnow():
+    utc_time = utcnow()
+    pacific = timezone('US/Pacific')
+    pst_time = utc_time.astimezone(pacific)
+    return pst_time
 
 def pretty_print_POST(req):
 	"""
@@ -89,11 +97,46 @@ def hello_world():
 def er_bot():
 	return render_template('er_bot.html')
 
+@app.route('/er_bot_get_conversation')
+def er_bot_get_conversation():
+	event_list = []
+	logging.info("Viewing single conversation...")
+
+	conv_id = request.args.get('conv_id')
+	if conv_id is not None:
+		logging.info("Conversation ID is not empty: "+str(conv_id))
+		events = EventLog.query.filter_by(conv_id=conv_id).order_by(sqlalchemy.asc(EventLog.timestamp)).limit(1000)
+		for event in events:
+			logging.info("Event:"+str(event.event))
+			event_list.append({'server_time':event.timestamp.isoformat(' '), 'data':json.loads(event.event)})
+
+	json_resp = json.dumps(event_list)
+
+	return make_response(json_resp, 200, {"content_type":"application/json"})
+
+
 @app.route('/er_bot_conversations')
 def list_er_bot_conversations():
 	er_conversations = []
-
 	logging.info("Rendering ER conversations...")
+
+	conv_ids = {}
+
+	allEvents = EventLog.query.limit(50)
+	for event in allEvents:
+		logging.info("Conv ID:"+event.conv_id)
+		if event.conv_id not in conv_ids:
+			logging.info("New conversation ID, get first date:")
+			no_events = EventLog.query.filter_by(conv_id=event.conv_id).order_by(sqlalchemy.asc(EventLog.timestamp)).count()
+			logging.info("Number of events: "+str(no_events))
+			oldest_event = EventLog.query.filter_by(conv_id=event.conv_id).order_by(sqlalchemy.asc(EventLog.timestamp)).first()
+			if oldest_event:
+				logging.info("Got first event" + oldest_event.timestamp.isoformat(' '))
+				conv_ids[event.conv_id] = { "start_date":oldest_event.timestamp.isoformat(' '), "no_events": no_events }
+
+	for key, value in conv_ids.items():
+		er_conversations.append( { 'datetime': value["start_date"],'filepath': key,'len': value['no_events'] } )
+
 
 	return render_template('list_er_conversations.html',
 		conversations = er_conversations
@@ -123,6 +166,8 @@ def log_er_event():
 		logging.info("Adding event to log...")
 		db.session.merge(eventLog)
 		db.session.commit()
+
+		json_resp = json.dumps( {'status':'OK', 'conv_id':conv_id, 'event_entry':event_data })
 	else:
 		logging.info("No data in event request")
 		json_resp = json.dumps({'status':'error', 'message':'No data in event log request!'})
