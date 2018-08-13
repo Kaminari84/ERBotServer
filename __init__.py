@@ -32,17 +32,19 @@ app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
 
 db = SQLAlchemy(app)
 
+#DATABASE Log class
 class EventLog(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	conv_id = db.Column(db.String(80))
 	event = db.Column(db.String(1024))
 	timestamp = db.Column(db.DateTime())
-	
+
 	def __init__(self, conv_id, event):
 		self.conv_id = conv_id
 		self.event = event
 		self.timestamp = pstnow()
 
+#Date-Time helpers
 def utcnow():
     return datetime.now(tz=pytz.utc)
 
@@ -52,6 +54,7 @@ def pstnow():
     pst_time = utc_time.astimezone(pacific)
     return pst_time
 
+#Debugging POST reqyest for TTS helper
 def pretty_print_POST(req):
 	"""
 	At this point it is completely built and ready
@@ -68,6 +71,7 @@ def pretty_print_POST(req):
 		req.body,
 	))
 
+#Server initial setup
 def setup_app(app):
 	'''
 	f = open('./logs/test.txt', 'w+')
@@ -122,7 +126,7 @@ def list_er_bot_conversations():
 
 	conv_ids = {}
 
-	allEvents = EventLog.query.limit(50)
+	allEvents = EventLog.query.order_by(sqlalchemy.desc(EventLog.timestamp)).limit(50)
 	for event in allEvents:
 		logging.info("Conv ID:"+event.conv_id)
 		if event.conv_id not in conv_ids:

@@ -1035,12 +1035,22 @@
 			return speech_speed;
 		}
 
-        function stopAudio(id) {
+        function stopAudio(id, q_id, message, isAlt) {
         	console.log("Audio stopped for id:"+id)
 			document.getElementById('play_'+id).innerHTML = 'play_circle_outline';
+
+			logEventToServer({
+				'event-type':'q-audio-stopped',
+				'timestamp':new Date().getTime(),
+				'q-id':q_id,
+				'q-text':message,
+				'q-alt':isAlt,
+				'dialogue-position':dialogue_position,
+				'audio-id':id
+			}); 
 		}
 
-        function playElem(audio_file, id){
+        function playElem(audio_file, id, q_id, message, isAlt){
        		console.log("Playing for elem:"+id);
        		var audio = document.getElementById('audio_'+id);
 
@@ -1048,16 +1058,49 @@
 	        	audio.src = audio_file; //"./static/audio/text.wav";
 	            audio.play();
 				document.getElementById('play_'+id).innerHTML = "play_circle_filled";
+
+				voice = getCurrentVoice();
+				var re = /[A-Za-z0-9_-]+(?=,)/g;
+				var myArray = voice.match(re);
+				var lang = myArray[0];
+
+				speech_speed = getSpeechSpeed();
+
+				logEventToServer({
+					'event-type':'q-audio-play',
+					'timestamp':new Date().getTime(),
+					'q-id':q_id,
+					'q-text':message,
+					'q-alt':isAlt,
+					'dialogue-position':dialogue_position,
+					'lang':lang,
+					'voice':voice,
+					'speech-speed':speech_speed,
+					'audio-file':audio_file,
+					'audio-id':id
+				}); 
+
 	        } else{
 	            audio.pause();
 	            audio.currentTime = 0
-	            document.getElementById('play_'+id).innerHTML = 'play_circle_outline';
+				document.getElementById('play_'+id).innerHTML = 'play_circle_outline';
+				
+				logEventToServer({
+					'event-type':'q-audio-paused',
+					'timestamp':new Date().getTime(),
+					'q-id':q_id,
+					'q-text':message,
+					'q-alt':isAlt,
+					'dialogue-position':dialogue_position,
+					'audio-file':audio_file,
+					'audio-id':id
+				}); 
 	        }
 
-	        audio.addEventListener('ended', function(){ stopAudio(id); });
+	        audio.addEventListener('ended', function(){ stopAudio(id, q_id, message, isAlt); });
         }
 
-        function downloadPlay(message, id){
+        function downloadPlay(message, id, q_id, isAlt){
         	
         	console.log("Running downloadPlay with message:"+message)
 		 	
@@ -1087,7 +1130,7 @@
 
 			          	console.log("Audio file from TTS in HTML: "+obj.audio_file);
 			          	if (!isMuted) {
-			          		playElem("http://35.237.203.78/"+obj.audio_file, id);
+			          		playElem("http://35.237.203.78/"+obj.audio_file, id, q_id, message, isAlt);
 			          	}
 				      	//playElem("http://35.237.203.78/"+obj.audio_file, id);
 			        }
@@ -1187,7 +1230,7 @@
 	  		msg_spec['delay'] = delay * (100.0/getSpeechSpeed());
 
 	  		botui.message.add(msg_spec).then(function (index) {
-				  addPlay(msg_spec['content']);
+				  addPlay(msg_spec['content'], givenPosition, alt);
 				  
 				  logEventToServer({
 					'event-type':'q-asked',
@@ -1475,7 +1518,7 @@
 		  }
 
 
-	  	function addPlay(message) {
+	  	function addPlay(message, q_id, isAlt) {
 	  		console.log("Adding play with message:"+message)
 	  		var elems = document.getElementsByClassName('botui-message');
 	      	var i = 0;
@@ -1501,12 +1544,12 @@
   				element.style.verticalAlign = "top";
   				element.style.color = "#3676F4";
   				
-  				element.onclick = function() {downloadPlay(message,i)};
+  				element.onclick = function() {downloadPlay(message,i, q_id, isAlt)};
 				
 	      		elems[i].appendChild(audio_tag);
 	      		elems[i].appendChild(document.createTextNode( '\u00A0' ));
 	      		elems[i].appendChild(element);
-  				downloadPlay(message,i);
+  				downloadPlay(message,i,q_id,isAlt);
   			}
 	  	}
 
