@@ -99,6 +99,36 @@ def list_er_bot_conversations():
 		conversations = er_conversations
 	)
 
+@app.route('/logErEvent')
+def log_er_event():
+	logging.info("Got log ER event request...")
+	json_resp = json.dumps({})
+	conv_id = request.args.get('conv_id')
+	data = request.args.get('data')
+	logging.info("Conv_id: "+str(conv_id))
+	logging.info("Data: "+str(data))
+	if conv_id is not None and data is not None:
+		logging.info("There is data in it!")
+
+		event_data = json.dumps({})
+		try:
+			event_data = json.loads(data)
+		except ValueError:
+			logging.info("Can't parse event data as JSON")
+			json_resp = json.dumps({'status':'error', 'message':'Provided event data not JSON according to Python3 json.loads'})
+			return make_response(json_resp, 200, {"content_type":"application/json"})
+
+		eventLog = EventLog(conv_id = conv_id, event = json.dumps(event_data))
+
+		logging.info("Adding event to log...")
+		db.session.merge(eventLog)
+		db.session.commit()
+	else:
+		logging.info("No data in event request")
+		json_resp = json.dumps({'status':'error', 'message':'No data in event log request!'})
+
+	return make_response(json_resp, 200, {"content_type":"application/json"})
+
 @app.route('/ttsRequest')
 def tts_request():
 	logging.info("tts request...")
