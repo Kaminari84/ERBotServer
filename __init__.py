@@ -118,7 +118,7 @@ def tts_request():
 		client_app_guid = 'e0e6613c7f7f4a5dbc06d5ad592895b4'
 		instance_app_guid = '94eb5ccc71344c27ae7ab3fd2e572a52'
 		app_name = 'Test_Speech_Gen'
-		audio_filename = "/static/audio/audio_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
+		audio_filename = "static/audio/audio_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
 
 		options = {
 			"http":{
@@ -176,6 +176,7 @@ def tts_request():
 		#print("Resp content:"+str(resp.content))
 
 		audio_fullpath = os.path.join(app.root_path, audio_filename)
+		logging.info("Audio full path:"+audio_fullpath)
 		with open(audio_fullpath, 'wb') as fd:
 			for chunk in resp.iter_content(chunk_size=128):
 				fd.write(chunk)
