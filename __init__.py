@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import requests
+import base64
 
 import time
 import pytz
@@ -30,6 +31,22 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
 
 db = SQLAlchemy(app)
+
+def pretty_print_POST(req):
+	"""
+	At this point it is completely built and ready
+	to be fired; it is "prepared".
+
+	However pay attention at the formatting used in 
+	this function because it is programmed to be pretty 
+	printed and may differ from the actual request.
+	"""
+	print('{}\n{}\n{}\n\n{}'.format(
+		'-----------START-----------',
+		req.method + ' ' + req.url,
+		'\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+		req.body,
+	))
 
 def setup_app(app):
 	'''
