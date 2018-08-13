@@ -1,9 +1,10 @@
 import logging
 import os
-import time
-import datetime
-import pytz
+import json
+import requests
 
+import time
+import pytz
 from datetime import datetime, timedelta
 from pytz import timezone
 from pytz import common_timezones
@@ -37,7 +38,7 @@ def setup_app(app):
 	f.close()
 	'''
 
-	audio_path = os.path.join(app.root_path, "/static/audio/audio_test.wav")
+	audio_path = os.path.join(app.root_path, "static/audio/audio_test.wav")
 	with open(audio_path, 'wb') as fd:
 		pass
 
@@ -100,7 +101,7 @@ def tts_request():
 		client_app_guid = 'e0e6613c7f7f4a5dbc06d5ad592895b4'
 		instance_app_guid = '94eb5ccc71344c27ae7ab3fd2e572a52'
 		app_name = 'Test_Speech_Gen'
-		audio_filename = "/static/audio/audio_"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
+		audio_filename = "/static/audio/audio_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
 
 		options = {
 			"http":{
