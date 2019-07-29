@@ -406,11 +406,13 @@
     </style>
 
     <script>
+		var participant_id = "None";
 		var conversation_uuid = guid(); // Unique identifier of this conversation - for logging
 		var isMuted;
-			var dialogue_position = 0;
-			var latest_answer = "Default";
-    	var dialogue = [ 
+		var dialogue_position = 0;
+		var latest_answer = "Default";
+    	var wasReaction = false;
+		var dialogue = [ 
     					/*Hello*/ 	 { text: {	
     											en: "Hello, my name is Harbor. I'd like to ask you a few questions.", 
     											es:"Hola, mi nombre es Harbour. Me gustaría hacerle algunas preguntas."}, 
@@ -433,12 +435,12 @@
     				 				  			es: "¿Puedes oírme bien?"}, 
     				 				  type: "Confirmation" },
 
-    				 				  { text: {
+    				 				 /* { text: {
     				 				  			en: "Please enter your given I D", 
     				 				  			es: "Por favor ingrese su dado I D"},
     				 				  altText: { en: "Type the number the assistant gave to you",
     				 				  			es: "Escriba el número que el asistente le dio"}, 
-    				 				  type: "Input" },
+    				 				  type: "Input" },*/
 
     					          	   
 
@@ -464,39 +466,46 @@
     				 				  type: "Skip", delay: 4000 },
     				 				  
     				 				  { text: {
-    				 				  			en: "Do you have enough resources to pay for the very basics like food, housing, and medical care?", 
-    				 				  			es: "¿Tiene dinero suficiente para pagar los conceptos básicos como comida, vivienda y atención médica?"},
-    				 				  altText: { en: "Is it hard to pay for food, a house, or going to see a doctor?",
-    				 				  			es: "¿Es difícil pagar comida, una casa o ir a ver a un médico?"}, 
-											 type: "Yes/No" },
-											 
-											
-											{ 
-												  text: {	
-													  en: {
-																Yes:"Great to hear you have enough resources!", //Follow-up when YES answered in previous	 
-																No:"Sorry to hear you do not have enough resources!" //Follow-up when NO answered in previous
-														}, 
-														es: {
-															  Yes:"¡Excelente escuchar que tienes suficientes recursos!", 
-																No:"Lamento escuchar que no tiene suficientes recursos!"
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
-											 
+    				 				  		en: "Do you have enough resources to pay for the very basics like food, housing, and medical care?", 
+    				 				  		es: "¿Tiene dinero suficiente para pagar los conceptos básicos como comida, vivienda y atención médica?"},
+    				 				  altText: { 
+										   	en: "Is it hard to pay for food, a house, or going to see a doctor?",
+    				 				  		es: "¿Es difícil pagar comida, una casa o ir a ver a un médico?"}, 
+									  type: "Yes/No",
+									  reactions: {
+										Yes: {
+											en:"That's good.",
+											es:"Eso es bueno."
+										},
+										No: {
+											en:"It sounds stressful, thanks for letting me know about it.",
+											es:"Suena estresante, gracias por dejarme saber al respecto."
+										}
+									  }	 
+									},
     				 				    				 				  
     				 				  { text: {
     				 				  			en: "Do you have any significant outstanding bills or debts?", 
     				 				  			es: "¿Tiene alguna factura impaga o grandes deudas acumulándose y causándole estrés?"},
     				 				  altText: { en: "Do you have any unpaid bills or large debts built up that might be causing you stress? ",
     				 							es: "¿Tiene facturas impagas o grandes deudas acumuladas que podrían estar causando estrés?"}, 
-    				 				  type: "Yes/No" },
+    				 				  type: "Yes/No",
+									  reactions: {
+											Yes: {
+												en:"I'll take a note of that.",
+												es:"Tomaré nota de eso."
+											},
+											No: {
+												en:"Okay.",
+												es:"¡Vale!"
+											}
+										}	  
+									  },
 
     				 	/*checklist- add 4 more*/
 
     				 				  { text: {
-    				 				  			en: "Okay, how is your work situation? Do you want help finding work or keeping work or a job?", 
+    				 				  			en: "How is your work situation? Do you want help finding work or keeping work or a job?", 
     				 				  			es: "De acuerdo, ¿cómo es tu situación de trabajo? ¿Quieres ayuda para encontrar trabajo o conservar un trabajo?"},
     				 				  altText: { en: "Do you need help finding a job?",
     				 				  			es: "¿Necesitas ayuda para encontrar un trabajo?"}, 
@@ -512,47 +521,53 @@
     				 				  		{value: "Opt_2", text : "Sí, ayuda a mantener un trabajo" },
     				 				  		{value: "Opt_3", text : "No necesito ni quiero ayuda"}
     				 				  	]
-    				 				  }
+    				 				  },
+									  reactions: {
+										Opt_1: {
+											en:"Ok, I'll try to help.",
+											es:"Ok, voy a tratar de ayudar."
+										},
+										Opt_2: {
+											en:"Ok, thanks for sharing.",
+											es:"Ok, gracias por compartir."
+										},
+										Opt_3: {
+											en:"Got it.",
+											es:"Lo tengo."
+										}
+									  }	 
     				 				}, 
 
-										 { 
-												  text: {	
-													  en: {
-																Opt_1:"Ok, we'll try to help.", //Follow-up when Opt_1 answered in previous	 
-																Opt_2:"Ok, thanks for sharing.", //Follow-up when Opt_2 answered in previous
-																Opt_3:"Got it."
-														}, 
-														es: {
-															  Opt_1:"Ok, vamos a tratar de ayudar.", 
-																Opt_2:"Ok, gracias por compartir.",
-																Opt_3:"Lo tengo."
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
-
 				        /*EDUCATION, TRAINING*/
-    				 				  { text: {
+    				 				{ text: {
     				 				  			en: "Do you want help with school or training? For example, starting or completing job training or getting a high school diploma, G E D or Equivalent?",
     				 				  			es: "¿Está interesado en comenzar o completar la capacitación laboral, un diploma de escuela secundaria o G E D?"},
     				 				  altText: { en: "Are you interested in job training, a high school diploma, or finishing/starting a GED?",
     				 							es: "¿Está interesado en capacitación laboral, un diploma de escuela secundaria o terminar / comenzar un GED?"},
-    				 				   type: "Yes/No" }, 
+    				 				   type: "Yes/No",
+										reactions: {
+											Yes: {
+												en:"I'll keep that in mind and try to help.",
+												es:"Lo tendré en cuenta y trataré de ayudar."
+											},
+											No: {
+												en:"Good to know.",
+												es:"Bueno saber."
+											}
+										} 
+									}, 
 
-    				 				   { text: {	en:"Good to know.", 
-    				 				  				es:"Bueno saber. "}, 
-    				 				  type: "Skip", delay: 4000 },
-
-				                      { text: {
+				                    { text: {
 				                      			en: "Do problems getting childcare make it difficult for you to work or study?",
 				                      			es: "¿Los problemas para obtener cuidado de niños hacen que le resulte difícil trabajar o estudiar?"},
 				                      altText: { en: "Do problems getting childcare make it difficult for you to work and study?",
     				 							es: "¿Los problemas para obtener cuidado infantil le dificultan trabajar y estudiar?"}, 
-				                      type: "Yes/No" }, 
+				                      type: "Yes/No"
+									}, 
 
 				                      { text: {
-				                      			en: "Okay, I'm getting a better idea of where you are at.",
-				                      			es: "De acuerdo, estoy obteniendo una mejor idea de dónde estás."}, 
+				                      			en: "Okay, I'm getting a better idea of your needs.",
+				                      			es: "Bien, estoy teniendo una mejor idea de tus necesidades."}, 
 				                      type: "Skip", delay: 3200 },
 
 				        /*HOUSING*/
@@ -575,18 +590,25 @@
     				 				  			{value: "Opt_2", text : "Tengo un lugar donde vivir hoy, pero me preocupa perderlo en el futuro." },
     				 				  			{value: "Opt_3", text : "No tengo un lugar estable para vivir."}
     				 				  		] 
-    				 				  	}
+    				 				  	},
+										jumpConditions: {
+											Opt_3: {
+												steps: 3 // -3 would mean going backwards 
+											}
+										}
     				 				},
-
-    				 				  { text: {
+									
+    				 				{ 
+										text: {
     				 				  		en: "Thinking about the place you live, do you have problems with any of the following? (check all that apply).",
     				 				  		es: "Al pensar en el lugar donde vive, ¿tiene problemas con alguno de los siguientes? (marque todo lo que corresponda)."
     				 				  	},
-    				 				  	altText: { en: "Which of the following problems do you have with the place you currently live in? Check all that apply.",
-    				 							es: "¿Cuál de los siguientes problemas tiene con el lugar donde vive actualmente? Marque todo lo que corresponda."},
+    				 				  	altText: { 
+											en: "Which of the following problems do you have with the place you currently live in? Check all that apply.",
+    				 						es: "¿Cuál de los siguientes problemas tiene con el lugar donde vive actualmente? Marque todo lo que corresponda."},
     				 				  
     				 				    type: "Options-multiple", 
-    								  options: {
+    								  	options: {
     								  		"en": [ 
     				 				  	{value: "Opt_1", text : "Pests such as bugs, ants, or mice" },
     				 				  	{value: "Opt_2", text : "Mold" },
@@ -609,40 +631,57 @@
     				 				  	]
     				 				  }
 
-    				 				  },  
+    				 				},  
 
-    				 				  { text: {
-    				 				  	en: "In the past 12 months has the electric, gas, oil, or water company threatened to shut off services in your home?",
-    				 				  	es: "El año pasado, ¿la compañía de electricidad, gas, petróleo o agua amenazó con cerrar los servicios en su hogar?" },
-    				 				  altText: { en: "In the past year, did you have to worry about not having electricity, gas, oil, or water in your home?",
-    				 							es: "El año pasado, ¿la compañía de electricidad, gas, petróleo o agua amenazó con cerrar los servicios en su hogar?"},
-    				 				   type: "Yes/No" },
+    				 				{ 	text: {
+    				 				  		en: "In the past 12 months has the electric, gas, oil, or water company threatened to shut off services in your home?",
+    				 				  		es: "El año pasado, ¿la compañía de electricidad, gas, petróleo o agua amenazó con cerrar los servicios en su hogar?" },
+    				 				  	altText: { 
+											en: "In the past year, did you have to worry about not having electricity, gas, oil, or water in your home?",
+    				 						es: "El año pasado, ¿la compañía de electricidad, gas, petróleo o agua amenazó con cerrar los servicios en su hogar?"},
+    				 					type: "Yes/No",
+										reactions:{
+											Yes: {
+												en: "That sounds frustrating.",
+												es: "Eso suena frustrante."
+											},
+											No: {
+												en: "Good to hear that this didn't happen.",
+												es: "Es bueno saber que esto no sucedió."
+											}
+										}
+									},
 
     				 	/*INCOME, BURDEN*/	
-    				 				   { text: {
-    				 				   	en: "It would be helpful to know more about you.",
-    				 				   	es: "Sería útil obtener algunos detalles." },
+    				 				{ 
+										text: {
+    				 				   		en: "It'd be helpful to know more about you.",
+    				 				   		es: "Sería útil obtener algunos detalles." },
     				 				   type: "Skip", delay: 4000 },
 
-    				 				   { text: {
+    				 				   
+									{ text: {
     				 				   	en: "What is your best estimate of all your [household]’s earnings last month before taxes and other deductions from all jobs and businesses, including hourly wages, salaries, tips and commissions? Type your answer.",
     				 				   	es: "¿Cuál es su mejor estimación de cuánto dinero ganaron usted y los miembros de su familia el mes pasado? (Antes de impuestos y deducciones). Incluye el dinero ganado de todos los trabajos y negocios (salarios por hora, salarios, propinas, etc.). Escriba su respuesta." },
     				 				   	altText: { en: "Can you provide us with your best estimate of how much money you and your household members earned altogether last month?",
     				 							es: "¿Puede proporcionarnos su mejor estimación de la cantidad de dinero que usted y los miembros de su hogar ganaron en total el mes pasado?"},
                                         type: "Input"},
 
-                                      { text: {
-                                      	en: "Got it.",
-                                      	es: "Lo tengo."}, 
-                                     	type: "Skip", delay: 2000 },
+                                    { text: {
+                                      	en: "Got it! Thanks for sharing.",
+                                      	es: "¡Lo tengo! Gracias por compartir."}, 
+                                     	type: "Skip", delay: 2000 
+									},
 
                          /*write in, decline options*/
     				 				    
-    				 				    { text: {
-    				 				    en: "Including yourself, how many people living in your household are supported by your total household income?",
-    				 				    es: "Incluyéndote a ti mismo, ¿a cuántas personas apoyas con tus ingresos mensuales?" },
-    				 				    altText: { en: "How many people do you support with your income?",
-    				 							es: "¿Cuántas personas proporciona con sus ingresos?"},
+    				 				{ 
+										text: {
+    				 				    	en: "Including yourself, how many people living in your household are supported by your total household income?",
+    				 				    	es: "Incluyéndote a ti mismo, ¿a cuántas personas apoyas con tus ingresos mensuales?" },
+    				 				    altText: { 
+											en: "How many people do you support with your income?",
+    				 						es: "¿Cuántas personas proporciona con sus ingresos?"},
    										type: "Options", 
     								    options: {
     								    	"en": [
@@ -657,15 +696,15 @@
 		    				 				  	{value: "Opt_3", text : "7-9 personas" }, 
 		    				 				  	{value: "Opt_4", text : "Más de 9 personas" } 
 		    				 				 ]
-    				 				  		}		
-    				 					}, 
+    				 				  	},		
+    				 				}, 
     				 	/*FOOD SECURITY*/				  	 
     				 					{ text: {
     				 						en: "In the past 12 months did you ever worry food would run out before you got money to buy more?",
     				 						es: "En el último año, ¿alguna vez te preocupaste que la comida se agote antes de que tengas dinero para comprar más?" },
     				 					altText: { en: "In the past year, how often did you worry whether food would run out before you got the money to buy more?",
     				 							es: "En el último año, ¿con qué frecuencia te preocupaste si la comida se agotaría antes de obtener el dinero para comprar más?"}, 
-    				 				  type: "Options", 
+    				 				  	type: "Options", 
     								    options: {
     								    	"en": [
 		    				 				  	{value: "Opt_1", text : "Often true" },
@@ -677,9 +716,24 @@
 		    				 				  	{value: "Opt_2", text : "A veces cierto" },
 		    				 				  	{value: "Opt_3", text : "Nunca es verdad" } 
 		    				 				]
-    				 				  	}
+    				 				  	},
+										reactions: {
+											Opt_1: {
+												en: "I wish you didn’t have to go through that.",
+												es: "Desearía que no tuvieras que pasar por eso."
+											},
+											Opt_2: {
+												en: "I wish you didn’t have to go through that.",
+												es: "Desearía que no tuvieras que pasar por eso."
+											},
+											Opt_3: {
+												en: "That's good.",
+												es: "Eso es bueno."
+											}
+										}
     				 				  }, 
-    				 				  { text: {
+
+    				 				{ text: {
     				 						en: "Within the past 12 months the food you bought just didn’t last and you didn’t have money to get more. Was this:",
     				 						es: "En el último año, ¿alguna vez te preocupaste que la comida se agote antes de que tengas dinero para comprar más?" },
     				 					altText: { en: "In the past year, did you run out of food? Was this:",
@@ -696,19 +750,28 @@
 		    				 				  	{value: "Opt_2", text : "A veces cierto" },
 		    				 				  	{value: "Opt_3", text : "Nunca es verdad" }
 		    				 				]
-    				 				  	}
-    				 				  }, 
- 							/*true*/
-    				 				 { text: {
-    				 				 	en: "That must be stressful, I'm sorry to hear that.",
-    				 				 	es: "Eso debe ser estresante. Recordaré conectarlo con recursos para obtener ayuda con eso." },
-    				 				 type: "Skip", delay: 5000 },
-
-
-    				 				 { text: {
+    				 				  	},
+										   reactions: {
+											Opt_1: {
+												en: "That must be stressful, I'm sorry to hear that.",
+												es: "Eso debe ser estresante. Recordaré conectarlo con recursos para obtener ayuda con eso."
+											},
+											Opt_2: {
+												en: "That must be stressful, I'm sorry to hear that.",
+												es: "Eso debe ser estresante. Recordaré conectarlo con recursos para obtener ayuda con eso."
+											},
+											Opt_3: {
+												en: "Good to hear that.",
+												es: "Bueno oír eso."
+											}
+										}	  
+    				 				}, 
+ 						
+    				 				{ text: {
     				 				 	en: "Next, I wonder if you are getting the health care you need?",
     				 				 	es: "Luego, me pregunto si está recibiendo la atención médica que necesita"}, 
-    				 				 type: "Skip", delay: 3500 },
+    				 				 type: "Skip", delay: 3500 
+									},
 
     				 	/*ACCESS TO HEALTHCARE*/
     				 				  { text: {
@@ -733,21 +796,39 @@
     				 							es: "¿Tiene alguien que pueda ayudarlo con las visitas al hospital y al médico?"}, 
     				 				  type: "Yes/No" },
 
-    				 				  { text: {
-    				 				  	en: "Do you have someone you can talk to when you are sad or upset?",
-    				 				  	es: "¿Tiene alguien que pueda ayudarlo a obtener atención médica (como obtener medicamentos o ir con usted a las citas?)"
-    				 				  },
-    				 				  altText: { en: "Do you have someone to talk to when you are sad?",
-    				 							es: "¿Tiene alguien que pueda ayudarlo con las visitas al hospital y al médico?"}, 
-    				 				  type: "Yes/No" },
+    				 				{ 
+										text: {
+    				 				  		en: "Do you have someone you can talk to when you are sad or upset?",
+    				 				  		es: "¿Tiene alguien que pueda ayudarlo a obtener atención médica (como obtener medicamentos o ir con usted a las citas?)"
+    				 				  	},
+    				 				  	altText: { 
+											en: "Do you have someone to talk to when you are sad?",
+    				 						es: "¿Tiene alguien que pueda ayudarlo con las visitas al hospital y al médico?"
+										}, 
+    				 				  	type: "Yes/No",
+										reactions: {
+											Yes: {
+												en: "That's always helpful.",
+												es: "Eso siempre es útil."
+											},
+											No: {
+												en: "It hurts me to hear that.",
+												es: "Me duele escuchar eso."
+											}
+										}
+									},
 
-                                      { text: {
-                                      	en: "Have you experienced difficulty getting needed services because you do not have transportation?",
-                                      	es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"
-                                      },
-                                      altText: { en: "Has it been tough to get needed services because you do not have transportation?",
-    				 							es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"}, 
-                                      type: "Yes/No" },
+                                    { 
+										text: {
+                                      		en: "Have you experienced difficulty getting needed services because you do not have transportation?",
+                                      		es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"
+                                      	},
+                                      	altText: { 
+										  	en: "Has it been tough to get needed services because you do not have transportation?",
+    				 						es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"
+										}, 
+                                      	type: "Yes/No",
+									},
 
     				 				  { text: {
     				 				  	en: "Do you currently have any health care bills that are being paid off over time?",
@@ -801,14 +882,27 @@
     				 				  type: "Skip", delay: 4000 },
 
     /*Add decline to answer*/	  	  
-    				 				  { text: {
-    				 				  	en: "Have you ever been slapped, kicked, hit or physically hurt by someone in the past year?",
-    				 				  	es: "¿Alguna vez alguien te ha abofeteado, pateado, golpeado o lastimado físicamente en el último año?"
-
-    				 				  },
-    				 				  altText: { en: "Have you been slapped, kicked, hit, or physically hurt by anyone in the past year?",
-    				 							es: "¿Ha sido abofeteado, pateado, golpeado o lastimado físicamente por alguien en el último año?"}, 
-    				 				  type: "Yes/No" },
+    				 				{ 
+										text: {
+    				 				  		en: "Have you ever been slapped, kicked, hit or physically hurt by someone in the past year?",
+    				 				  		es: "¿Alguna vez alguien te ha abofeteado, pateado, golpeado o lastimado físicamente en el último año?"
+    				 				  	},
+    				 				  	altText: { 
+											en: "Have you been slapped, kicked, hit, or physically hurt by anyone in the past year?",
+    				 						es: "¿Ha sido abofeteado, pateado, golpeado o lastimado físicamente por alguien en el último año?"
+										}, 
+    				 				  	type: "Yes/No",
+										reactions: {
+											Yes: {
+												en: "You are in a lot of pain here. I can feel it.",
+												es: "Tienes mucho dolor aquí. Puedo sentirlo."
+											},
+											No: {
+												en: "I am glad this is not a problem.",
+												es: "Me alegra que esto no sea un problema."
+											}
+										}
+									},
                                     
 
     				 				  { text: {
@@ -819,37 +913,41 @@
     				 							es: "¿Has estado con alguien que te lastimó?"}, 
     				 				  type: "Yes/No" },
 
-    				 				  { text: {
-    				 				  	en: "Have you ever been pressured or forced to have sex?",
-    				 				  	es: "¿Alguna vez te han presionado o forzado a tener relaciones sexuales?"
-    				 				  },
-    				 				  altText: { en: "Has someone made you have sex when you did not want to?",
-    				 							es: "¿Alguien te hizo tener sexo cuando no querías?"}, 
-    				 				  type: "Yes/No" },
+    				 				{ 
+										text: {
+    				 				  		en: "Have you ever been pressured or forced to have sex?",
+    				 				  		es: "¿Alguna vez te han presionado o forzado a tener relaciones sexuales?"
+    				 				  	},
+    				 				  	altText: { 
+											en: "Has someone made you have sex when you did not want to?",
+    				 						es: "¿Alguien te hizo tener sexo cuando no querías?"
+										}, 
+    				 				  	type: "Yes/No",
+										reactions: {
+											Yes: {
+												en: "So sorry to hear that.",
+												es: "Siento mucho oir eso."
+											},
+											No: {
+												en: "Good to hear.",
+												es: "Bueno escuchar."
+											}
+										} 
+									},
 
                                       
 
-                                      { text: {
-                                      	en: "Thank you for your answers—I'm getting a better idea of your situation.",
-                                      	es: "Gracias por sus respuestas. Tengo una mejor idea de su situación."
-                                      }, 
-                                      type: "Skip", delay: 3500 },
+                                    { 
+										text: {
+                                      		en: "Thank you for your answers—I'm getting a better idea of your situation.",
+                                      		es: "Gracias por sus respuestas. Tengo una mejor idea de su situación."
+                                      	}, 
+                                      	type: "Skip", delay: 3500 
+									},
 
                                       { text: {
-                                      	en: "Your safety is most important.",
-                                      	es: "Tu seguridad es lo más importante"
-                                      }, 
-                                      type: "Skip", delay: 3000 },
-
-                                      { text: {
-                                      	en: "Okay.",
-                                      	es: "Bueno."
-                                      }, 
-                                      type: "Skip", delay: 4000 },
-
-                                      { text: {
-                                      	en: "How safe do you feel where you live?",
-                                      	es: "¿Qué tan seguro te sientes donde vives?"
+                                      	en: "Your safety is most important. I wonder about how safe you feel where you live...",
+                                      	es: "¿Qué tan seguro te sientes donde vives, ..."
                                       }, 
                                       type: "Skip", delay: 4000 },
 
@@ -869,21 +967,40 @@
     				 							es: "¿Te ha pasado algo en los últimos 6 meses que consideraste un crimen, pero no le informaste a la policía?"}, 
     				 				  type: "Yes/No" },
 
-                                       { text: {
-                                       	en: "Do you have someone you can call in an emergency?",
-                                       	es: "¿Tiene a alguien a quien pueda llamar en caso de emergencia?"
-                                       },
-                                       altText: { en: "Do you have someone in your life you can call in case of an emergency? ",
-    				 							es: "¿Tiene alguien en su vida a quien pueda llamar en caso de una emergencia?"}, 
-                                      type: "Yes/No" },
+                                    { 
+										text: {
+                                       		en: "Do you have someone you can call in an emergency?",
+                                       		es: "¿Tiene a alguien a quien pueda llamar en caso de emergencia?"
+                                       	},
+                                       	altText: { 
+											en: "Do you have someone in your life you can call in case of an emergency? ",
+    				 						es: "¿Tiene alguien en su vida a quien pueda llamar en caso de una emergencia?"
+										}, 
+                                      	type: "Yes/No",
+										reactions: {
+											Yes: {
+												en: "Great!",
+												es: "¡Genial!"
+											},
+											No: {
+												en: "I’d love to help you with that.",
+												es: "Me encantaría ayudarte con eso."
+											}
+										} 
+									},
 
-                    /*if homeless?*/ { text: {
-                    					en: "Do you spend time in a home where a gun is kept?",
-                    					es: "¿Vives en un lugar donde se guarda un arma?"
-                    				},
-                    				altText: { en: "Is there a gun where you’re staying?",
-    				 							es: "¿Mantienes un arma en casa?"}, 
-                                      type: "Options", 
+                    /*if homeless?*/ 
+									{ 
+										text: {
+                    						en: "Do you spend time in a home where a gun is kept?",
+                    						es: "¿Vives en un lugar donde se guarda un arma?"
+                    					},
+                    					altText: 
+										{ 
+											en: "Is there a gun where you’re staying?",
+    				 						es: "¿Mantienes un arma en casa?"
+										}, 
+                                      	type: "Options", 
                                         options: { 
                                         	"en": [
                                         		{value: "Opt_1", text : "Yes" },
@@ -895,36 +1012,46 @@
                                         		{value: "Opt_2", text : "No" },
                                         		{value: "Opt_3", text : "Negarse a contestar" } 
                                         	]
-                                       	}
+                                       	},
+										reactions: {
+											Opt_1: {
+												en: "Thanks for sharing that.",
+												es: "Gracias por compartir eso."
+											},
+											Opt_2: {
+												en: "Got it.",
+												es: "Lo tengo."
+											},
+											Opt_3: {
+												en: "Sure, no problem.",
+												es: "Claro, no hay problema."
+											}
+										}
                                     }, 
 
-                                    { text: {
-    				 				  	en: "Again, your safety is most important.",
-    				 				  	es: "Nuevamente, su seguridad es lo más importante."
-    				 				  },  
-    								  type: "Skip", delay: 5000 },
-
     				 				  { text: {
-    				 				  	en: "We are almost at the end of the survey.",
-    				 				  	es: "Estamos casi al final de la encuesta."
+    				 				  	en: "We are almost at the end of the survey. I appreciate your patience.",
+    				 				  	es: "Estamos casi al final de la encuesta. Aprecio tu paciencia."
     				 				  },  
     								  type: "Skip", delay: 5000 },
 
-    								
                      /*RANDOM AREAS*/	
     								  { text: {
-    								  	en: "First, are there other areas where you may need help.",
-    								  	es: "Primero, hay otras áreas donde puede necesitar ayuda."
+    								  	en: "Before we finish, could we talk a bit about other areas where you may need help...",
+    								  	es: "Antes de que terminemos, ¿podemos hablar un poco sobre otras áreas donde puede necesitar ayuda..."
     								  },  
     									type: "Skip", delay: 3500 },
 
-    								  { text: {
-    								  	en: "Would you like legal guidance or help with any of the following issues? Check all that apply.",
-    								  	es: "¿Desea orientación legal o ayuda con alguno de los siguientes problemas?"
-    								  },
-    								  altText: { en: "Do you want legal advice on any of these topics? Check all that apply.",
-    				 							es: "¿Desea asesoramiento legal sobre alguno de estos temas?"}, 
-                                      type: "Options-multiple", 
+    								{ 
+										text: {
+    								  		en: "Would you like legal guidance or help with any of the following issues? Check all that apply.",
+    								  		es: "¿Desea orientación legal o ayuda con alguno de los siguientes problemas?"
+    								  	},
+    								  	altText: { 
+											en: "Do you want legal advice on any of these topics? Check all that apply.",
+    				 						es: "¿Desea asesoramiento legal sobre alguno de estos temas?"
+										}, 
+                                      	type: "Options-multiple", 
                                         options: {
                                         	"en": [ 
 		                                        {value: "Opt_1", text : "Immigration" },
@@ -993,18 +1120,31 @@
 	                                }
                                   },
 
-                                      
+                                    { 
+										text: {
+                                      		en: "Do problems getting childcare make it difficult for you to work or attend school?",
+                                      		es: "¿Los problemas para obtener cuidado de niños hacen que sea difícil para usted trabajar o asistir a la escuela?"
+                                      	},
+                                      	altText: { 
+											en: "Is it hard to find childcare?",
+    				 						es: "¿Es difícil encontrar cuidado de niños?"
+										}, 
+                                      	type: "Yes/No",
+										reactions: {
+											Yes: {
+												en: "Again, so sorry to hear that.",
+												es: "Una vez más, siento mucho escuchar eso."
+											},
+											No: {
+												en: "Okay.",
+												es: "¡Está bien!"
+											}
+										}
+									
+									},  
 
-                                      { text: {
-                                      	en: "Do problems getting childcare make it difficult for you to work or attend school?",
-                                      	es: "¿Los problemas para obtener cuidado de niños hacen que sea difícil para usted trabajar o asistir a la escuela?"
-                                      },
-                                      altText: { en: "Is it hard to find childcare?",
-    				 							es: "¿Es difícil encontrar cuidado de niños?"}, 
-                                      type: "Yes/No" },  
 
-
-                                      { text: {
+                                    { text: {
                                       	en: "Now I just need some basic info and we will be done!",
                                       	es: "Ahora solo necesito información básica y ¡estaremos listos!"
                                       },  
@@ -1256,7 +1396,7 @@
 		}
 
         function stopAudio(id, q_id, message, isAlt) {
-        	console.log("Audio stopped for id:"+id)
+        	//console.log("Audio stopped for id:"+id)
 			document.getElementById('play_'+id).innerHTML = 'volume_mute';
 
 			logEventToServer({
@@ -1271,7 +1411,7 @@
 		}
 
         function playElem(audio_file, id, q_id, message, isAlt){
-       		console.log("Playing for elem:"+id);
+       		//console.log("Playing for elem:"+id);
        		var audio = document.getElementById('audio_'+id);
 
 	        if (audio.paused) {
@@ -1322,20 +1462,20 @@
 
         function downloadPlay(message, id, q_id, isAlt){
         	
-        	console.log("Running downloadPlay with message:"+message)
+        	//console.log("Running downloadPlay with message:"+message)
 		 	
 		 	if (message) {
  				voice = getCurrentVoice();
-				console.log("Current voice:"+voice);
+				//console.log("Current voice:"+voice);
 
 				var re = /[A-Za-z0-9_-]+(?=,)/g;
 				var myArray = voice.match(re);
 				var lang = myArray[0];
-				console.log("Lang:"+lang);
+				//console.log("Lang:"+lang);
 
 				speech_speed = getSpeechSpeed();//document.getElementById("speech_speed").value;
 				speed_reduction = 100.00 - speech_speed
-				console.log("Speed reduction:"+speed_reduction)
+				//console.log("Speed reduction:"+speed_reduction)
 
 				var request = $.ajax({
 			        url: "http://34.73.108.214/ttsRequest",
@@ -1345,7 +1485,7 @@
 			        async: true, 
 			        success : function (msg)
 			        {
-			          	console.log("Called TTS successfully!")
+			          	//console.log("Called TTS successfully!")
 			          	var obj = JSON.parse(msg);
 
 			          	console.log("Audio file from TTS in HTML: "+obj.audio_file);
@@ -1376,8 +1516,12 @@
 				'event-type':'start-conversation',
 				'date': date,
 				'time': time,
-				'timestamp':new Date().getTime()
+				'timestamp':new Date().getTime(),
+				'pid': participant_id,
 			}); 
+
+			//console.log("----STARTING CONVERSATION----");
+			//console.log("--> sending PID: "+participant_id);
 
 
 	    	var e = document.getElementById("start_button");
@@ -1397,7 +1541,7 @@
 
 			//Function to log the event to server using AJAX
 			function logEventToServer(event) {
-			  console.log("Logging event to server: "+event+", conversation uuid: "+conversation_uuid);
+			  //console.log("Logging event to server: "+event+", conversation uuid: "+conversation_uuid);
 
 			  var request = $.ajax({
 			        url: "http://34.73.108.214/logErEvent",
@@ -1409,11 +1553,11 @@
 			        async: true, 
 			        success : function (msg)
 			        {
-			          	console.log("Called log event successfully!");
+			          	//("Called log event successfully!");
 			          	var obj = JSON.parse(msg);
 
 						//check server response, it should have status="OK", otherwise it will be status="error" and a message with error description
-						  console.log("Response status: "+obj.status);
+						  //console.log("Response status: "+obj.status);
 						  if (obj.status !== "OK") {
 							  console.log("Something went wrong and event did not log: "+obj.message);
 						  }
@@ -1421,13 +1565,13 @@
 			    });
 		  }
 
-	  	function progressDialogue(givenPosition = dialogue_position, alt = false) {
+	  	function progressDialogue(givenPosition = dialogue_position, alt = false, isReaction = false) {
 	  		console.log("Progressing dialogue, current position: "+ givenPosition)
 	  		//playEmotion(); 
 	  		var e = document.getElementById("languages");
 			var lang = e.options[e.selectedIndex].value;
-			console.log("Language selected:"+lang);
-			console.log("Voice selected: "+getCurrentVoice());
+			//console.log("Language selected:"+lang);
+			//console.log("Voice selected: "+getCurrentVoice());
 
 	  		if (givenPosition > dialogue.length) {
 	  			console.log("Dialogue ended!");
@@ -1440,18 +1584,31 @@
 	  		
 	  		if(dialogue_position !== 0){
 	  			msg_spec['loading'] = true;
-				}
+			}
+
+			// Set the correct response type to handle the block
+			responseType = dialogue[givenPosition]['type'];
 				
-				//Check the conditional Socializing answers
-				if (dialogue[givenPosition]['type'] == "Conditional") {
-					//Get the text version that matches the latest answer
-					console.log("The lates answer I have:"+latest_answer);
-					//Check if we have this answer option, if not that is programmers error!
-					if (latest_answer in dialogue[givenPosition]["text"][lang]) {
-						msg_spec['content'] = dialogue[givenPosition]["text"][lang][latest_answer];
+			//Check the conditional Socializing answers
+			if (responseType == "Conditional") {
+				//Get the text version that matches the latest answer
+				console.log("The lates answer I have:"+latest_answer);
+				//Check if we have this answer option, if not that is programmers error!
+				if (latest_answer in dialogue[givenPosition]["text"][lang]) {
+					msg_spec['content'] = dialogue[givenPosition]["text"][lang][latest_answer];
+				} else {
+					//No matching text for this answer option, this is programmers error!
+					msg_spec['content'] = "Missing matching follow-up text for answer option: "+latest_answer;
+				}
+			} else {
+				//Handing an immediate reaction to a response
+				if (isReaction == true) {
+					responseType = "Reaction"; //This is a reaction, change a response type for question
+					if (latest_answer in dialogue[givenPosition]["reactions"]) {
+						msg_spec['content'] = dialogue[givenPosition]["reactions"][latest_answer][lang];
 					} else {
-						//No matching text for this answer option, this is programmers error!
-						msg_spec['content'] = "Missing matching follow-up text for answer option: "+latest_answer;
+						//No matching text for this answer option, this should not happen, the conditional in response should not allow this!
+						msg_spec['content'] = "Missing matching reaction text for answer option: "+latest_answer;
 					}
 				} else {
 					if(alt) {
@@ -1460,10 +1617,13 @@
 						msg_spec['content'] = dialogue[givenPosition]['text'][lang];
 					}
 				}
+			}
 	  		
 	  		//msg_spec['delay'] = delay * (100.0/getSpeechSpeed());
-	  		msg_spec['delay'] = setDelay(alt, givenPosition, lang) * (100.0/getSpeechSpeed());
-	  		/*if(dialogue[givenPosition]['type'] === "Image") {
+	  		msg_spec['delay'] = setDelay(alt, wasReaction, givenPosition, lang) * (100.0/getSpeechSpeed());
+	  		wasReaction = isReaction;
+			console.log("---Message:"+msg_spec['content']+", delay:"+msg_spec['delay']);
+			/*if(dialogue[givenPosition]['type'] === "Image") {
 	  			msg_spec = {};
 	  			msg_spec['content'] = 'Here is an image ![product image](https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80)'
 	  		}*/
@@ -1487,7 +1647,7 @@
 					'q-alt':alt
 					});
 
-	  			switch (dialogue[givenPosition]['type']) {
+	  			switch (responseType) {
 	  				case "Image":
 	  					console.log("Adding image.");
 						if(!alt) {
@@ -1501,8 +1661,9 @@
 						  }
 						break;
 	  				case "Skip":
-						case "Conditional": //Conditional is the same as skip from the perspective of what follows the text
-	  					console.log("Auto progress message...");
+					case "Conditional": //Conditional is the same as skip from the perspective of what follows the text
+					case "Reaction":
+	  					//console.log("Auto progress message...");
 	  					if(!alt) {
 		  					if (previous_dialogue_position != 0) {
 		  						dialogue_position = previous_dialogue_position;
@@ -1540,7 +1701,7 @@
 							break 
 					case "Confirmation":
 						showActionBar();
-	  					console.log("Confirm type of response..." + givenPosition);
+	  					//console.log("Confirm type of response..." + givenPosition);
 	  					addUtilButtons(givenPosition, false, true);
 	  					var buttons_lang = [
 						    { // show only one button
@@ -1573,7 +1734,7 @@
 								'q-answer':res.text
 							}); 
 							
-							console.log("Got value from Confirmation:" + res.value); // will print "one" from 'value'
+							//console.log("Got value from Confirmation:" + res.value); // will print "one" from 'value'
 							latest_answer = res.value;
 
 
@@ -1643,13 +1804,28 @@
 			  					progressDialogue(givenPosition, true);
 			  				} 
 			  				else {
-			  					if (previous_dialogue_position != 0) {
-			  						dialogue_position = previous_dialogue_position;
-			  						previous_dialogue_position = 0;
-			  					} else {
-				  					dialogue_position += 1;
-				  				}
-			  					progressDialogue();
+								//This block has a reaction, first process this before jumping back
+								isProgressDialogue = true;
+								console.log("-> Checking if there are reactions...");
+								if ('reactions' in dialogue[givenPosition] ) {
+									console.log("---Block has REACTIONS, processing....");
+									if (latest_answer in dialogue[givenPosition]["reactions"]) {
+										console.log("Response has a reaction!!!");
+										isProgressDialogue = false;
+										progressDialogue(givenPosition, false, true);
+									}
+								}
+
+								if (isProgressDialogue == true) {
+									console.log("---NO REACTIONS, progressing dialogue as normal...");
+									if (previous_dialogue_position != 0) {
+										dialogue_position = previous_dialogue_position;
+										previous_dialogue_position = 0;
+									} else {
+										dialogue_position += 1;
+									}
+									progressDialogue();
+								}
 			  				}
 						});
 						break;
@@ -1665,6 +1841,7 @@
 	  						action: [
 						    { // show only one button
 						    	placeholder: 'Enter your salary here',
+								sub_type: 'number',
 						    	position: givenPosition
 						    }
 						  ]
@@ -1726,29 +1903,65 @@
 							console.log("Got value from Options:" + res.value); // will print "one" from 'value'
 							latest_answer = res.value;
 
-							//if (!alt) {
-			  					if (previous_dialogue_position != 0) {
-			  						dialogue_position = previous_dialogue_position;
-			  						previous_dialogue_position = 0;
-			  					} else {
-				  					dialogue_position += 1;
-				  				}
-							//}
-
-			console.log("edit_selection: " + givenPosition);
-			console.log("edit_selection prev: " + previous_dialogue_position);
-			console.log("edit_selection dialogue: " + dialogue_position);
-							if (res.text === "I do not have a steady place to live.") {
-								dialogue_position += 2;
-								progressDialogue();
-							} else if (res.text === "Never true" && msg_spec['content'] === "Within the past 12 months the food you bought just didn’t last and you didn’t have money to get more. Was this:") {
-								dialogue_position += 1;
-								progressDialogue();
-							} else {
-								progressDialogue();
+							//This block has a reaction, first process this before jumping back
+							isProgressDialogue = true;
+							console.log("-> Checking if there are reactions...");
+							if ('reactions' in dialogue[givenPosition] ) {
+								console.log("---Block has REACTIONS, processing....");
+								if (latest_answer in dialogue[givenPosition]["reactions"]) {
+									console.log("Response has a reaction!!!");
+									isProgressDialogue = false;
+									progressDialogue(givenPosition, false, true);
+								}
 							}
-							//(res.text === "Explain") ? progressDialogue(msg_delay, givenPosition, true) : progressDialogue(msg_delay);
-							//progressDialogue(msg_delay);
+
+							if (isProgressDialogue == true) {
+								console.log("---NO REACTIONS, progressing dialogue as normal...");
+
+								console.log("edit_selection: " + givenPosition);
+								console.log("edit_selection prev: " + previous_dialogue_position);
+								console.log("edit_selection dialogue: " + dialogue_position);	
+
+								if (previous_dialogue_position != 0) {
+									dialogue_position = previous_dialogue_position;
+									previous_dialogue_position = 0;
+								} else {
+									//Does the response have jump conditions
+									if ("jumpConditions" in dialogue[givenPosition]) {
+										console.log("PROCESSING JUMP CONDITIONS...")
+										console.log("The latest answer I have:"+latest_answer);
+										//Check if we have this answer option, if not that is programmers error!
+										if (latest_answer in dialogue[givenPosition]["jumpConditions"]) {
+											console.log("-> [Before JUMP] - position:", dialogue_position);
+											console.log("Jump value raw: "+dialogue[givenPosition]["jumpConditions"][latest_answer]["steps"]);
+											console.log("Jump value parsed: "+parseInt(dialogue[givenPosition]["jumpConditions"][latest_answer]["steps"]));
+											dialogue_position += parseInt(dialogue[givenPosition]["jumpConditions"][latest_answer]["steps"]) || 1;
+											console.log("-> [After JUMP] - position:", dialogue_position);
+										} else {
+											console.log("No jump for this option...");
+											//No jump for this answer option, progress at a normal pace
+											dialogue_position += 1;
+										} 
+									} else { // No jump conditions
+										dialogue_position += 1;
+									}
+								}
+								
+								progressDialogue();
+
+								
+								/*if (res.text === "I do not have a steady place to live.") {
+									dialogue_position += 2;
+									progressDialogue();
+								} else if (res.text === "Never true" && msg_spec['content'] === "Within the past 12 months the food you bought just didn’t last and you didn’t have money to get more. Was this:") {
+									dialogue_position += 1;
+									progressDialogue();
+								} else {*/
+								
+								//}
+								//(res.text === "Explain") ? progressDialogue(msg_delay, givenPosition, true) : progressDialogue(msg_delay);
+								//progressDialogue(msg_delay);
+							}
 						});
 						break;
 					case "Options-multiple":
@@ -1833,11 +2046,11 @@
 	  		console.log("Adding play with message:"+message)
 	  		var elems = document.getElementsByClassName('botui-message');
 	      	var i = 0;
-	      	console.log("Elems:"+elems.length);
+	      	//console.log("Elems:"+elems.length);
 	      	if (elems.length>0) {
       			var i = elems.length -1;
 
-	      		console.log("el:"+i);
+	      		//console.log("el:"+i);
 
 	      		var audio_tag = document.createElement("audio");
 				audio_tag.id = "audio_"+i;
@@ -1975,7 +2188,7 @@
 	  	}
 
 	  	// set delay of the message based on the length of the previous message
-	  	function setDelay(alt, givenPosition, lang) {
+	  	function setDelay(alt, isReaction, givenPosition, lang) {
 	  		if(givenPosition == 0) {
 	  			return 0;
 	  		}
@@ -1990,10 +2203,20 @@
 					} else {
 						message = dialogue[givenPosition - 1]['text'][lang];
 					}
+
+					if (isReaction) {
+						console.log("***IS REACTION****: "+dialogue[givenPosition-1]['type']);
+						try {
+							message = dialogue[givenPosition-1]['reactions'][latest_answer][lang];
+						} catch(err) {
+							message = "Filler message for delay."
+						}
+						console.log("---->MSG: "+message);
+					}
 				}
 				
 				//If we had just text without answer, then wait for user to read
-				if (dialogue[givenPosition - 1]['type'] == "Skip" || dialogue[givenPosition - 1]['type'] == "Conditional") {
+				if (dialogue[givenPosition - 1]['type'] == "Skip" || dialogue[givenPosition - 1]['type'] == "Conditional" || isReaction) {
 					var length = message.length;
 					var delay;
 					if (length <= 50) {
@@ -2038,6 +2261,16 @@
 	  		var message = document.getElementsByClassName('botui-message')[i];
 	  		message.id = "message_" + i;
 	  	}
+
+		function setPID() {
+			var pid = document.getElementById('participant_id').value;
+			console.log("PID:"+pid);
+			participant_id = pid;
+
+			document.getElementById('participant_id').style.display = "None";
+			document.getElementById('save_pid_button').style.display = "None";
+			document.getElementById("start_button").style.display = "inline-block";
+		}
 
     </script>
 
@@ -2085,7 +2318,7 @@
 		        <div class="col-lg-3 "> </div>       
 		        <div class="col-lg-6">   
 
-			          <image src="./static/images/bot-selected.png"  id="botLogo" class="pull-left" style="padding-top:10px; height:62px; width: 50px;" > </image>
+			          <img src="./static/images/bot-selected.png"  id="botLogo" class="pull-left" style="padding-top:10px; height:62px; width: 50px;" />
 			          <div class="classWithPad" >
 				          <h4>Harbor</h4>
 
@@ -2111,7 +2344,9 @@
 		        </div>
 
 		        <div class="col-lg-6 text-center">
-		          <button id="start_button" type="button" onclick="return restartDialogue();">Talk to Harbor</button>	  
+					<input id="participant_id" type="input" size="8" />
+					<button id="save_pid_button" onclick="return setPID();">Save Participant ID</button> <br />
+		          	<button id="start_button" style="display:none;" type="button" onclick="return restartDialogue();">Talk to Harbor</button>	  
 		        </div>
 		        <div class="col-lg-3">
 		        	<div id="activity"></div>

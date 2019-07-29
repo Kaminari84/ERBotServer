@@ -408,8 +408,7 @@
     <script>
 		var conversation_uuid = guid(); // Unique identifier of this conversation - for logging
 		var isMuted;
-			var dialogue_position = 0;
-			var latest_answer = "Default";
+    	var dialogue_position = 0;
     	var dialogue = [ 
     					/*Hello*/ 	 { text: {	
     											en: "Hello, my name is Harbor. I'd like to ask you a few questions.", 
@@ -468,23 +467,7 @@
     				 				  			es: "¿Tiene dinero suficiente para pagar los conceptos básicos como comida, vivienda y atención médica?"},
     				 				  altText: { en: "Is it hard to pay for food, a house, or going to see a doctor?",
     				 				  			es: "¿Es difícil pagar comida, una casa o ir a ver a un médico?"}, 
-											 type: "Yes/No" },
-											 
-											
-											{ 
-												  text: {	
-													  en: {
-																Yes:"Great to hear you have enough resources!", //Follow-up when YES answered in previous	 
-																No:"Sorry to hear you do not have enough resources!" //Follow-up when NO answered in previous
-														}, 
-														es: {
-															  Yes:"¡Excelente escuchar que tienes suficientes recursos!", 
-																No:"Lamento escuchar que no tiene suficientes recursos!"
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
-											 
+    				 				  type: "Yes/No" },
     				 				    				 				  
     				 				  { text: {
     				 				  			en: "Do you have any significant outstanding bills or debts?", 
@@ -515,21 +498,11 @@
     				 				  }
     				 				}, 
 
-										 { 
-												  text: {	
-													  en: {
-																Opt_1:"Ok, we'll try to help.", //Follow-up when Opt_1 answered in previous	 
-																Opt_2:"Ok, thanks for sharing.", //Follow-up when Opt_2 answered in previous
-																Opt_3:"Got it."
-														}, 
-														es: {
-															  Opt_1:"Ok, vamos a tratar de ayudar.", 
-																Opt_2:"Ok, gracias por compartir.",
-																Opt_3:"Lo tengo."
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
+				                      { text: {
+				                      	en: "Got it.",
+				                      	es: "Lo tengo."
+				                      }, 
+				                      type: "Skip", delay: 2000 },
 
 				        /*EDUCATION, TRAINING*/
     				 				  { text: {
@@ -930,7 +903,7 @@
 		                                        {value: "Opt_1", text : "Immigration" },
 		                                        {value: "Opt_2", text : "Unpaid tickets" },
 		                                        {value: "Opt_3", text : "Eviction" }, 
-		                                        {value: "Opt_4", text : "Outstanding warrants" },
+		                                        {value: "Opt_4", text : "Outstanding Warrants" },
 		                                        {value: "Opt_5", text : "Clearing your record/expungement" },
 		                                        {value: "Opt_6", text : "Child custody" },
 		                                        {value: "Opt_7", text : "Child support" },
@@ -1028,7 +1001,7 @@
                                        type: "Input"},
 
                                       { text: {
-                                      	en: "For how many years did you go to school? Type your answer.",
+                                      	en: "For how many years did you go to school? Type your answer",
                                       	es: "¿Cuántos años de escuela has completado? (Escribe tu respuesta)"
                                       },
                                       altText: { en: "How long were you in school?",
@@ -1440,26 +1413,13 @@
 	  		
 	  		if(dialogue_position !== 0){
 	  			msg_spec['loading'] = true;
-				}
-				
-				//Check the conditional Socializing answers
-				if (dialogue[givenPosition]['type'] == "Conditional") {
-					//Get the text version that matches the latest answer
-					console.log("The lates answer I have:"+latest_answer);
-					//Check if we have this answer option, if not that is programmers error!
-					if (latest_answer in dialogue[givenPosition]["text"][lang]) {
-						msg_spec['content'] = dialogue[givenPosition]["text"][lang][latest_answer];
-					} else {
-						//No matching text for this answer option, this is programmers error!
-						msg_spec['content'] = "Missing matching follow-up text for answer option: "+latest_answer;
-					}
-				} else {
-					if(alt) {
-						msg_spec['content'] = dialogue[givenPosition]['altText'][lang];
-					} else {
-						msg_spec['content'] = dialogue[givenPosition]['text'][lang];
-					}
-				}
+	  		}
+
+	  		if(alt) {
+	  			msg_spec['content'] = dialogue[givenPosition]['altText'][lang];
+	  		} else {
+	  			msg_spec['content'] = dialogue[givenPosition]['text'][lang];
+	  		}
 	  		
 	  		//msg_spec['delay'] = delay * (100.0/getSpeechSpeed());
 	  		msg_spec['delay'] = setDelay(alt, givenPosition, lang) * (100.0/getSpeechSpeed());
@@ -1501,7 +1461,6 @@
 						  }
 						break;
 	  				case "Skip":
-						case "Conditional": //Conditional is the same as skip from the perspective of what follows the text
 	  					console.log("Auto progress message...");
 	  					if(!alt) {
 		  					if (previous_dialogue_position != 0) {
@@ -1573,8 +1532,8 @@
 								'q-answer':res.text
 							}); 
 							
-							console.log("Got value from Confirmation:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+							console.log("Got value from Yes/No:" + res.value); // will print "one" from 'value'
+
 
 
 		  					if (previous_dialogue_position != 0) {
@@ -1637,7 +1596,7 @@
 							}); 
 							 
 							console.log("Got value from Yes/No:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+
 
 			  				if (res.text === "Explain") {
 			  					progressDialogue(givenPosition, true);
@@ -1682,8 +1641,6 @@
 							}); 
 
 							console.log("Got value from Input:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
-
 		  					if (previous_dialogue_position != 0) {
 		  						dialogue_position = previous_dialogue_position;
 		  						previous_dialogue_position = 0;
@@ -1724,8 +1681,6 @@
 							}); 
 
 							console.log("Got value from Options:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
-
 							//if (!alt) {
 			  					if (previous_dialogue_position != 0) {
 			  						dialogue_position = previous_dialogue_position;
@@ -1787,8 +1742,7 @@
 								'q-answer':res.text
 							}); 
 
-							console.log("Got value from Options-multiple:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+							console.log("Got value from Options:" + res.value); // will print "one" from 'value'
 
 			  				if (res.text === "Explain") {
 			  					progressDialogue(givenPosition, true); 
@@ -1979,40 +1933,31 @@
 	  		if(givenPosition == 0) {
 	  			return 0;
 	  		}
-				
-				if (dialogue[givenPosition - 1]['type'] == "Conditional") {
-					if (latest_answer in dialogue[givenPosition-1]["text"][lang]) {
-						message = dialogue[givenPosition-1]["text"][lang][latest_answer];
-					}
-				} else {
-					if(alt) {
-						message = dialogue[givenPosition - 1]['altText'][lang];
-					} else {
-						message = dialogue[givenPosition - 1]['text'][lang];
-					}
-				}
-				
-				//If we had just text without answer, then wait for user to read
-				if (dialogue[givenPosition - 1]['type'] == "Skip" || dialogue[givenPosition - 1]['type'] == "Conditional") {
-					var length = message.length;
-					var delay;
-					if (length <= 50) {
-						delay = 4500;
-					} else if (length > 50 && length <= 100) {
-						delay = 5000;
-					} else if (length > 100 && length <= 150) {
-						delay = 5500;
-					} else {
-						delay = 8000;
-					}
-					//low = ~50, high ~200					
-					//CREATE FOR LOOP THAT LOOPS THROUGH STRING TO SEE HOW MANY PUNCTUATION MARKS, ADJUST DELAY ACCORDINGLY
-					if (isMuted) { delay = delay - 1500;} // reduces delay if speaking is off
-				//If there was a reply required, then user likely read the question already - no need to wait
-				} else {
-					delay = 500;
-				}
+	  		if(alt) {
+	  			message = dialogue[givenPosition - 1]['altText'][lang];
+	  		} else {
+	  			message = dialogue[givenPosition - 1]['text'][lang];
+	  		}
+	  		var length = message.length;
+	  		var delay;
+	  		if (length <= 50) {
+	  			delay = 4500;
+	  		} else if (length > 50 && length <= 100) {
+	  			delay = 5000;
+	  		} else if (length > 100 && length <= 150) {
+	  			delay = 5500;
+	  		} else {
+	  			delay = 8000;
+	  		}
+	  		//low = ~50, high ~200
+	  		
+	  		// 
 
+	  		//CREATE FOR LOOP THAT LOOPS THROUGH STRING TO SEE HOW MANY PUNCTUATION MARKS, ADJUST DELAY ACCORDINGLY
+
+	  		//
+	  		
+	  		if (isMuted) { delay = delay - 1500;} // reduces delay if speaking is off
 	  		return delay;
 	  	}
 
@@ -2117,13 +2062,12 @@
 		        	<div id="activity"></div>
 		        
 		        </div>
-		      </div> <!-- /ROW -->
+		      </div>
 		    </div> <!-- /container -->		
-			<div class="botui-app-container text-left" id="hello-world" 
-			style="border: 0px solid black; min-width:400px; max-width:500px; width:50%; margin-left:auto; margin-right:auto">
+		    <div class="botui-app-container text-left" id="hello-world" style="border: 0px solid black">
 		            <bot-ui></bot-ui>
-	        </div>	    
-        </div> <!-- /content -->
+	              </div>	    
+        </div>
     </div>
 
     <div class="overlay"></div>

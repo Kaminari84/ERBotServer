@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <title>TEST REDCap Upload</title>
+    </head>
+    <body>
+	<script type="JavaScript">
+		function upload() {
+			console.log("Pressed!");
+			var request = $.ajax({
+                                url: "http://34.73.108.214/logErEvent",
+                                        type: "GET",
+                                        // conv_id identifies this unique conversation, on the server it adds an event to the JSON file identofied by this id
+                                        // the data needs to be a properly formatted JSON, otherwise the server will complain
+                                data: {conv_id: conversation_uuid, data: JSON.stringify(event)},
+                                dataType: "html",
+                                async: true,
+                                success : function (msg)
+                                {
+                                        console.log("Called log event successfully!");
+                                        var obj = JSON.parse(msg);
+                                                //check server response, it should have status="OK", otherwise it will be status="error" and a message with error de$
+                                                  console.log("Response status: "+obj.status);
+                                                  if (obj.status !== "OK") {
+                                                          console.log("Something went wrong and event did not log: "+obj.message);
+                                                  }
+                                }
+                            });
+		}
+	</script>
+        <center>
+		<button onclick='upload()'>Upload</button>
+        </center>
+    </body>
+</html>
+

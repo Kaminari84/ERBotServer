@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Harbour Bot</title>
+    <title>ER Bot</title>
 
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -90,7 +90,6 @@
         .right {
         	float:right;
         }
-
 
 		#sidebarCollapse {
 			background-color: #f8f9fa;
@@ -406,25 +405,16 @@
     </style>
 
     <script>
-		var conversation_uuid = guid(); // Unique identifier of this conversation - for logging
-		var isMuted;
+			var bot_name = "Harbor";
+			var participant_id = "None";
+			var conversation_uuid = guid(); // Unique identifier of this conversation - for logging
+			var isMuted = true;
 			var dialogue_position = 0;
-			var latest_answer = "Default";
     	var dialogue = [ 
     					/*Hello*/ 	 { text: {	
     											en: "Hello, my name is Harbor. I'd like to ask you a few questions.", 
     											es:"Hola, mi nombre es Harbour. Me gustaría hacerle algunas preguntas."}, 
     					          	   type: "Skip", delay: 7500 },
-
-    					          	 {  text: {	
-    											en: "Before we begin, I'd like to make sure you can hear me ok.", 
-    											es:"Antes de comenzar, me gustaría asegurarme de que pueda escucharme bien."}, 
-    					          	   type: "Skip", delay: 7000 },
-
-    					          	 {  text: {	
-    											en: "You can adjust the volume using the volume control on the tablet.", 
-    											es:"Puede ajustar el volumen usando el control de volumen en la tableta."}, 
-    					          	   type: "Skip", delay: 7000 },
 
     					          	 {  text: {
     				 				  			en: "When you are ready, please click on continue. If you don't understand the question, tap the question mark icon.", 
@@ -432,21 +422,6 @@
     				 				  altText: { en: "Can you hear me ok?",
     				 				  			es: "¿Puedes oírme bien?"}, 
     				 				  type: "Confirmation" },
-
-    				 				  { text: {
-    				 				  			en: "Please enter your given I D", 
-    				 				  			es: "Por favor ingrese su dado I D"},
-    				 				  altText: { en: "Type the number the assistant gave to you",
-    				 				  			es: "Escriba el número que el asistente le dio"}, 
-    				 				  type: "Input" },
-
-    					          	   
-
-    					          	   /*{ text: {en: "Did you know that feeling stressed makes it harder to stay healthy?"}, 
-    					          	   type: "Skip", delay: 4000 },
-
-    				 				  { text: {en: " My job is to find ways to reduce stress in your life so you can recover faster and stay healthy."}, 
-    				 				  type: "Skip", delay: 5500 },*/
 
     				 				  { text: {	en: "Great! Let's begin. Remember your answers are confidential.", 
     				 				  			es:"¡Estupendo! Vamos a empezar. Recuerde que sus respuestas son confidenciales."}, 
@@ -468,23 +443,11 @@
     				 				  			es: "¿Tiene dinero suficiente para pagar los conceptos básicos como comida, vivienda y atención médica?"},
     				 				  altText: { en: "Is it hard to pay for food, a house, or going to see a doctor?",
     				 				  			es: "¿Es difícil pagar comida, una casa o ir a ver a un médico?"}, 
-											 type: "Yes/No" },
-											 
-											
-											{ 
-												  text: {	
-													  en: {
-																Yes:"Great to hear you have enough resources!", //Follow-up when YES answered in previous	 
-																No:"Sorry to hear you do not have enough resources!" //Follow-up when NO answered in previous
-														}, 
-														es: {
-															  Yes:"¡Excelente escuchar que tienes suficientes recursos!", 
-																No:"Lamento escuchar que no tiene suficientes recursos!"
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
-											 
+    				 				  type: "Yes/No" },
+
+										/*	{ text: {	en: "So sorry to hear!", 
+    				 				  			es:""}, 
+    				 				  type: "Skip", delay: 4000 },*/
     				 				    				 				  
     				 				  { text: {
     				 				  			en: "Do you have any significant outstanding bills or debts?", 
@@ -515,21 +478,11 @@
     				 				  }
     				 				}, 
 
-										 { 
-												  text: {	
-													  en: {
-																Opt_1:"Ok, we'll try to help.", //Follow-up when Opt_1 answered in previous	 
-																Opt_2:"Ok, thanks for sharing.", //Follow-up when Opt_2 answered in previous
-																Opt_3:"Got it."
-														}, 
-														es: {
-															  Opt_1:"Ok, vamos a tratar de ayudar.", 
-																Opt_2:"Ok, gracias por compartir.",
-																Opt_3:"Lo tengo."
-														}
-													},
-												 	type: "Conditional", delay: 0 
-											},
+				                      { text: {
+				                      	en: "Got it.",
+				                      	es: "Lo tengo."
+				                      }, 
+				                      type: "Skip", delay: 2000 },
 
 				        /*EDUCATION, TRAINING*/
     				 				  { text: {
@@ -556,7 +509,7 @@
 				                      type: "Skip", delay: 3200 },
 
 				        /*HOUSING*/
-    				 				  { text: {
+    				 				  /*{ text: {
     				 				  		en: "What is your housing situation today?",
     				 				  		es: "¿Cuál es su situación de vivienda hoy?"
     				 				  	},
@@ -576,7 +529,7 @@
     				 				  			{value: "Opt_3", text : "No tengo un lugar estable para vivir."}
     				 				  		] 
     				 				  	}
-    				 				},
+    				 				},*/
 
     				 				  { text: {
     				 				  		en: "Thinking about the place you live, do you have problems with any of the following? (check all that apply).",
@@ -739,395 +692,7 @@
     				 				  },
     				 				  altText: { en: "Do you have someone to talk to when you are sad?",
     				 							es: "¿Tiene alguien que pueda ayudarlo con las visitas al hospital y al médico?"}, 
-    				 				  type: "Yes/No" },
-
-                                      { text: {
-                                      	en: "Have you experienced difficulty getting needed services because you do not have transportation?",
-                                      	es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"
-                                      },
-                                      altText: { en: "Has it been tough to get needed services because you do not have transportation?",
-    				 							es: "¿Ha sido difícil obtener los servicios necesarios porque no tiene transporte?"}, 
-                                      type: "Yes/No" },
-
-    				 				  { text: {
-    				 				  	en: "Do you currently have any health care bills that are being paid off over time?",
-    				 				  	es: "¿Actualmente tiene facturas de atención médica que se cancelan con el tiempo?"
-    				 				  },
-    				 				  altText: { en: "Are you paying off hospital bills right now?",
-    				 							es: "¿Estás pagando las facturas del hospital en este momento?"}, 
-    				 				  type: "Yes/No" },
-
-    				 				  { text: {
-    				 				  	en: "Are you currently covered by any of these types of health insurance?",
-    				 				  	es: "¿Actualmente está cubierto por alguno de estos tipos de seguro de salud?"
-    				 				  },
-    				 				  altText: { en: "Do you have health insurance with any of these groups?",
-    				 							es: "¿Tiene seguro de salud con alguno de estos grupos?"}, 
-    				 				  type: "Options", 
-    								    options: {
-    								    	"en": [
-		    				 				  	{value: "Opt_1", text : "Medicaid" },
-		    				 				  	{value: "Opt_2", text : "Medicare" },
-		    				 				  	{value: "Opt_3", text : "Veteran’s Health Care or TRICARE" },
-		    				 				  	{value: "Opt_4", text : "COBRA Insurance" },
-		    				 				  	{value: "Opt_5", text : "No insurance (uninsured)" },
-		    				 				  	{value: "Opt_6", text : "Other"},
-		    				 				  	{value: "Opt_7", text : "Not sure" } 
-		    				 				],
-		    				 				"es": [
-		    				 				  	{value: "Opt_1", text : "Medicaid" },
-		    				 				  	{value: "Opt_2", text : "Medicare" },
-		    				 				  	{value: "Opt_3", text : "Veteran’s Health Care or TRICARE" },
-		    				 				  	{value: "Opt_4", text : "COBRA Insurance" },
-		    				 				  	{value: "Opt_5", text : "No insurance (uninsured)" },
-		    				 				  	{value: "Opt_6", text : "Other"},
-		    				 				  	{value: "Opt_7", text : "Not sure" }  
-		    				 				]
-    				 				  	} },
-						/*insert example or check list?*/
-
-							/*PERSONAL SAFETY*/
-    				 				  
-    				 				  { text: {
-    				 				  	en: "I appreciate your answers so far!",
-    				 				  	se: "Aprecio tus respuestas hasta ahora!" 
-    				 				  }, 
-    									type: "Skip", delay: 3000 },
-
-    				 				  { text: {
-    				 				  	en: "The next questions are about your personal safety and may be tough to answer.",
-    				 				  	es: "Las siguientes preguntas son sobre su seguridad personal y pueden ser difíciles de responder."
-    				 				  }, 
-    				 				  type: "Skip", delay: 4000 },
-
-    /*Add decline to answer*/	  	  
-    				 				  { text: {
-    				 				  	en: "Have you ever been slapped, kicked, hit or physically hurt by someone in the past year?",
-    				 				  	es: "¿Alguna vez alguien te ha abofeteado, pateado, golpeado o lastimado físicamente en el último año?"
-
-    				 				  },
-    				 				  altText: { en: "Have you been slapped, kicked, hit, or physically hurt by anyone in the past year?",
-    				 							es: "¿Ha sido abofeteado, pateado, golpeado o lastimado físicamente por alguien en el último año?"}, 
-    				 				  type: "Yes/No" },
-                                    
-
-    				 				  { text: {
-    				 				  	en: "Are you currently in or have you ever been in an abusive relationship?",
-    				 				  	es: "¿Estás actualmente o has estado alguna vez en una relación abusiva?"
-    				 				  },
-    				 				  altText: { en: "Have you been with someone who hurt you?",
-    				 							es: "¿Has estado con alguien que te lastimó?"}, 
-    				 				  type: "Yes/No" },
-
-    				 				  { text: {
-    				 				  	en: "Have you ever been pressured or forced to have sex?",
-    				 				  	es: "¿Alguna vez te han presionado o forzado a tener relaciones sexuales?"
-    				 				  },
-    				 				  altText: { en: "Has someone made you have sex when you did not want to?",
-    				 							es: "¿Alguien te hizo tener sexo cuando no querías?"}, 
-    				 				  type: "Yes/No" },
-
-                                      
-
-                                      { text: {
-                                      	en: "Thank you for your answers—I'm getting a better idea of your situation.",
-                                      	es: "Gracias por sus respuestas. Tengo una mejor idea de su situación."
-                                      }, 
-                                      type: "Skip", delay: 3500 },
-
-                                      { text: {
-                                      	en: "Your safety is most important.",
-                                      	es: "Tu seguridad es lo más importante"
-                                      }, 
-                                      type: "Skip", delay: 3000 },
-
-                                      { text: {
-                                      	en: "Okay.",
-                                      	es: "Bueno."
-                                      }, 
-                                      type: "Skip", delay: 4000 },
-
-                                      { text: {
-                                      	en: "How safe do you feel where you live?",
-                                      	es: "¿Qué tan seguro te sientes donde vives?"
-                                      }, 
-                                      type: "Skip", delay: 4000 },
-
-                                       { text: {
-                                       	en: "Are you afraid you might be hurt by violence in your neighborhood?",
-                                       	es: "¿Tienes miedo de que puedas ser herido por la violencia en tu vecindario?"
-                                       },
-                                       altText: { en: "Are you scared of being hurt by your house?",
-    				 							es: "¿Tienes miedo de ser herido por tu casa?"}, 
-                                      type: "Yes/No" },
-
-    				 				  { text: {
-    				 				  	en: "Did anything happen to you during the last 6 months, which you thought was a crime, but did not report to the police?",
-    				 				  	es: "¿Le sucedió algo durante los últimos 6 meses, que usted pensó que era un crimen, pero no se presentó a la policía?"
-    				 				  },
-    				 				  altText: { en: "Did you experience a crime in the past 6 months?",
-    				 							es: "¿Te ha pasado algo en los últimos 6 meses que consideraste un crimen, pero no le informaste a la policía?"}, 
-    				 				  type: "Yes/No" },
-
-                                       { text: {
-                                       	en: "Do you have someone you can call in an emergency?",
-                                       	es: "¿Tiene a alguien a quien pueda llamar en caso de emergencia?"
-                                       },
-                                       altText: { en: "Do you have someone in your life you can call in case of an emergency? ",
-    				 							es: "¿Tiene alguien en su vida a quien pueda llamar en caso de una emergencia?"}, 
-                                      type: "Yes/No" },
-
-                    /*if homeless?*/ { text: {
-                    					en: "Do you spend time in a home where a gun is kept?",
-                    					es: "¿Vives en un lugar donde se guarda un arma?"
-                    				},
-                    				altText: { en: "Is there a gun where you’re staying?",
-    				 							es: "¿Mantienes un arma en casa?"}, 
-                                      type: "Options", 
-                                        options: { 
-                                        	"en": [
-                                        		{value: "Opt_1", text : "Yes" },
-                                        		{value: "Opt_2", text : "No" },
-                                        		{value: "Opt_3", text : "Decline to answer" }  
-                                        	],
-                                        	"es": [
-                                        		{value: "Opt_1", text : "Sí" },
-                                        		{value: "Opt_2", text : "No" },
-                                        		{value: "Opt_3", text : "Negarse a contestar" } 
-                                        	]
-                                       	}
-                                    }, 
-
-                                    { text: {
-    				 				  	en: "Again, your safety is most important.",
-    				 				  	es: "Nuevamente, su seguridad es lo más importante."
-    				 				  },  
-    								  type: "Skip", delay: 5000 },
-
-    				 				  { text: {
-    				 				  	en: "We are almost at the end of the survey.",
-    				 				  	es: "Estamos casi al final de la encuesta."
-    				 				  },  
-    								  type: "Skip", delay: 5000 },
-
-    								
-                     /*RANDOM AREAS*/	
-    								  { text: {
-    								  	en: "First, are there other areas where you may need help.",
-    								  	es: "Primero, hay otras áreas donde puede necesitar ayuda."
-    								  },  
-    									type: "Skip", delay: 3500 },
-
-    								  { text: {
-    								  	en: "Would you like legal guidance or help with any of the following issues? Check all that apply.",
-    								  	es: "¿Desea orientación legal o ayuda con alguno de los siguientes problemas?"
-    								  },
-    								  altText: { en: "Do you want legal advice on any of these topics? Check all that apply.",
-    				 							es: "¿Desea asesoramiento legal sobre alguno de estos temas?"}, 
-                                      type: "Options-multiple", 
-                                        options: {
-                                        	"en": [ 
-		                                        {value: "Opt_1", text : "Immigration" },
-		                                        {value: "Opt_2", text : "Unpaid tickets" },
-		                                        {value: "Opt_3", text : "Eviction" }, 
-		                                        {value: "Opt_4", text : "Outstanding warrants" },
-		                                        {value: "Opt_5", text : "Clearing your record/expungement" },
-		                                        {value: "Opt_6", text : "Child custody" },
-		                                        {value: "Opt_7", text : "Child support" },
-		                                        {value: "Opt_8", text : "Getting an ID/birth certificate" },
-		                                        {value: "Opt_9", text : "Public Benefits (CalFresh/Food Stamps" },
-		                                        {value: "Opt_10", text : "SSI/Social Security, General Relief" },
-		                                        {value: "Opt_11", text : "CalWORKs,Medi-Cal, Medicare" }
-                                        	],
-                                        	"es": [
-                                        		{value: "Opt_1", text : "Inmigración" },
-		                                        {value: "Opt_2", text : "Boletos sin pagar" },
-		                                        {value: "Opt_3", text : "Desalojo" }, 
-		                                        {value: "Opt_4", text : "Registro sobresaliente" },
-		                                        {value: "Opt_5", text : "Compensación de warrants" },
-		                                        {value: "Opt_6", text : "Borrar su registro / expungement" },
-		                                        {value: "Opt_7", text : "Custodia del niño" },
-		                                        {value: "Opt_8", text : "Manutención de los hijos" },
-		                                        {value: "Opt_9", text : "Obtener una identificación / certificado de nacimiento" },
-		                                        {value: "Opt_10", text : "Beneficios públicos (CalFresh / Food Stamps" },
-		                                        {value: "Opt_11", text : "SSI / Seguridad Social, Socorro general" },
-		                                        {value: "Opt_12", text : "CalWORKs, Medi-Cal, Medicare" }
-                                        	]
-                                        }
-                                    },
-
-                                    { text: {
-                                        	en: "How is your work situation? Which of the following best describes your employment status right now? (Check all that apply)",
-                                        	es: "¿Cómo es tu situación de trabajo? ¿Cuál de las siguientes opciones describe mejor su situación laboral en este momento?"
-                                    },
-                                    altText: { en: "Which of the following best describes your employment status right now?",
-    				 							es: "¿Cómo es tu situación laboral ahora? ¿Cuál de las siguientes opciones describe mejor su situación laboral en este momento?"}, 
-                                      type: "Options-multiple", 
-                                      options: {
-                                      	"en":[ 
-		                                      {value: "Opt_1", text : "Working full time" },
-		                                      {value: "Opt_2", text : "Working part time" },
-		                                      {value: "Opt_3", text : "A seasonal worker" },
-		                                      {value: "Opt_4", text : "Laid off" },
-		                                      {value: "Opt_5", text : "On strike" },
-		                                      {value: "Opt_6", text : "On sick leave" },
-		                                      {value: "Opt_7", text : "Disabled" },
-		                                      {value: "Opt_8", text : "Maternity or paternity leave" },
-		                                      {value: "Opt_9", text : "Unemployed - not looking for work" },
-		                                      {value: "Opt_10", text : "Unemployed - looking for work" },
-		                                      {value: "Opt_11", text : "Retired" },
-		                                      {value: "Opt_12", text : "Student" },
-		                                      {value: "Opt_13", text : "Homemaker" }
-
-	                                    ],
-	                                    "es":[
-	                                    	{value: "Opt_1", text : "Trabajando a tiempo completo" },
-		                                    {value: "Opt_2", text : "Trabajo a tiempo parcial" },
-		                                    {value: "Opt_3", text : "Un trabajador estacional" },
-		                                      {value: "Opt_4", text : "Despedido" },
-		                                      {value: "Opt_5", text : "En huelga" },
-		                                      {value: "Opt_6", text : "De baja por enfermedad" },
-		                                      {value: "Opt_7", text : "Discapacitado" },
-		                                      {value: "Opt_8", text : "Licencia por maternidad o paternidad" }
-	                                    ]
-	                                }
-                                  },
-
-                                      
-
-                                      { text: {
-                                      	en: "Do problems getting childcare make it difficult for you to work or attend school?",
-                                      	es: "¿Los problemas para obtener cuidado de niños hacen que sea difícil para usted trabajar o asistir a la escuela?"
-                                      },
-                                      altText: { en: "Is it hard to find childcare?",
-    				 							es: "¿Es difícil encontrar cuidado de niños?"}, 
-                                      type: "Yes/No" },  
-
-
-                                      { text: {
-                                      	en: "Now I just need some basic info and we will be done!",
-                                      	es: "Ahora solo necesito información básica y ¡estaremos listos!"
-                                      },  
-                                        type: "Skip", delay: 3000 },
-
-
-    				 				  { text: {
-    				 				  	en: "What is your current age? Type your answer.",
-    				 				  	es: "¿Cual es tu edad? Escribe tu respuesta."
-    				 				  },
-    				 				  altText: { en: "How old are you?",
-    				 							es: "¿Cuantos años tienes?"}, 
-    				 				    type: "Input" },
-
-    				 				  { text: {
-                                      	en: "What is your zip code? Type your answer.",
-                                      	es: "¿Cuántos años de escuela has completado? (Escribe tu respuesta)"
-                                      },
-                                      altText: { en: "In what zip code do you live?",
-    				 							es: "¿Cuánto tiempo estuviste en la escuela?"}, 
-                                       type: "Input"},
-
-                                      { text: {
-                                      	en: "For how many years did you go to school? Type your answer.",
-                                      	es: "¿Cuántos años de escuela has completado? (Escribe tu respuesta)"
-                                      },
-                                      altText: { en: "How long were you in school?",
-    				 							es: "¿Cuánto tiempo estuviste en la escuela?"}, 
-                                       type: "Input"},
-
-                                      { text: {
-                                      	en: "How do you currently describe yourself?",
-                                      	es: "¿Cómo te describes curricándamente?"
-                                      },
-                                      altText: { en: "How do you identify?",
-    				 							es: "¿Cómo te identificas?"}, 
-                                      type: "Options", 
-                                      options: {
-                                      	"en": [ 
-		                                      {value: "Opt_1", text : "Male" },
-		                                      {value: "Opt_2", text : "Female" },
-		                                      {value: "Opt_3", text : "Transgender" },
-		                                      {value: "Opt_4", text : "None of these" },
-		                                      {value: "Opt_5", text : "Skip this question" },
-		                                      {value: "Opt_6", text : "Refused to answer" },
-		                                      {value: "Opt_7", text : "Don't know" }
-	                                      ],
-	                                    "es": [
-	                                    	  {value: "Opt_1", text : "Masculino" },
-		                                      {value: "Opt_2", text : "Hembra" },
-		                                      {value: "Opt_3", text : "Transgénero" },
-		                                      {value: "Opt_4", text : "Ninguno de esos" },
-		                                      {value: "Opt_5", text : "Omita esta pregunta" },
-		                                      {value: "Opt_6", text : "No sé" }
-	                                    ]
-	                                }
-                                  },
-                                  	
-                                   
-                                    { text: {
-    				 				  	en: "What is your racial and ethnic background?",
-    				 				  	es: "¿Cual es tu edad? Escribe tu respuesta."
-    				 				  },
-    				 				  altText: { en: "What is your race and ethnicity?",
-    				 							es: "¿Cuantos años tienes?"}, 
-    				 				  type: "Options", 
-                                      options: {
-                                      	"en": [ 
-		                                      {value: "Opt_1", text : "American Indian or Alaska Native" },
-		                                      {value: "Opt_2", text : "Asian" },
-		                                      {value: "Opt_3", text : "Black or African American" },
-		                                      {value: "Opt_4", text : "Hispanic or Latino" },
-		                                      {value: "Opt_5", text : "Native Hawaiian or other Pacific Islander" },
-		                                      {value: "Opt_6", text : "Multiple Race, including Mestizo" },
-											  {value: "Opt_8", text : "White" },
-											  {value: "Opt_7", text : "Other" }
-	                                      ],
-	                                    "es": [
-	                                    	  {value: "Opt_1", text : "" },
-		                                      {value: "Opt_2", text : " " },
-		                                      {value: "Opt_3", text : " " },
-		                                      {value: "Opt_4", text : " " },
-		                                      {value: "Opt_5", text : " " },
-		                                      {value: "Opt_6", text : " " },
-		                                      {value: "Opt_7", text : " " }
-	                                    ]
-	                                } 
-	                            },
-
-    				 				{ text: {
-    				 				  	en: "What is your primary language?",
-    				 				  	es: "¿Cual es tu edad? Escribe tu respuesta."
-    				 				  },
-    				 				  altText: { en: "What language do you speak?",
-    				 							es: "¿Cuantos años tienes?"}, 
-    				 				    type: "Input" },
-
-    				 				{ text: {
-    				 				  	en: "How would you rate your overall health?",
-    				 				  	es: "¿Cual es tu edad? Escribe tu respuesta."
-    				 				  },
-    				 				  altText: { en: "How is your health?",
-    				 							es: "¿Cuantos años tienes?"}, 
-    				 				  type: "Options", 
-                                      options: {
-                                      	"en": [ 
-		                                      {value: "Opt_1", text : "Poor" },
-		                                      {value: "Opt_2", text : "Fair" },
-		                                      {value: "Opt_3", text : "Good" },
-		                                      {value: "Opt_4", text : "Very good" },
-		                                      {value: "Opt_5", text : "Excellent" }
-	                                      ],
-	                                    "es": [
-	                                    	  {value: "Opt_1", text : "" },
-		                                      {value: "Opt_2", text : " " },
-		                                      {value: "Opt_3", text : " " },
-		                                      {value: "Opt_4", text : " " },
-		                                      {value: "Opt_5", text : " " },
-		                                      {value: "Opt_6", text : " " },
-		                                      {value: "Opt_7", text : " " }
-	                                    ]
-	                                } 
-	                            },
+    				 				  type: "Yes/No" },                                
 
                                       { text: {
                                       	en: "Done! Thank you for your time!",
@@ -1141,6 +706,19 @@
 
     	$( document ).ready(function() {
 	    	console.log( "ready!" );
+
+				//Give it a name
+				var e = document.getElementById("top_name_tag");
+				if (e) {
+					e.innerHTML = bot_name;
+				}
+
+				//Change the button to have the name
+				var e = document.getElementById("start_button");
+				if (e) {
+					e.innerHTML = "Talk to "+bot_name;
+				}
+				
 
 		  
 			var sel = document.getElementById('languages');
@@ -1376,8 +954,13 @@
 				'event-type':'start-conversation',
 				'date': date,
 				'time': time,
-				'timestamp':new Date().getTime()
+				'timestamp':new Date().getTime(),
+				'pid': participant_id,
+				'bot_name': bot_name
 			}); 
+			console.log("----STARTING CONVERSATION----");
+			console.log("--> sending PID: "+participant_id);
+
 
 
 	    	var e = document.getElementById("start_button");
@@ -1440,30 +1023,18 @@
 	  		
 	  		if(dialogue_position !== 0){
 	  			msg_spec['loading'] = true;
-				}
-				
-				//Check the conditional Socializing answers
-				if (dialogue[givenPosition]['type'] == "Conditional") {
-					//Get the text version that matches the latest answer
-					console.log("The lates answer I have:"+latest_answer);
-					//Check if we have this answer option, if not that is programmers error!
-					if (latest_answer in dialogue[givenPosition]["text"][lang]) {
-						msg_spec['content'] = dialogue[givenPosition]["text"][lang][latest_answer];
-					} else {
-						//No matching text for this answer option, this is programmers error!
-						msg_spec['content'] = "Missing matching follow-up text for answer option: "+latest_answer;
-					}
-				} else {
-					if(alt) {
-						msg_spec['content'] = dialogue[givenPosition]['altText'][lang];
-					} else {
-						msg_spec['content'] = dialogue[givenPosition]['text'][lang];
-					}
-				}
+	  		}
+
+	  		if(alt) {
+	  			msg_spec['content'] = dialogue[givenPosition]['altText'][lang];
+	  		} else {
+	  			msg_spec['content'] = dialogue[givenPosition]['text'][lang];
+	  		}
 	  		
 	  		//msg_spec['delay'] = delay * (100.0/getSpeechSpeed());
 	  		msg_spec['delay'] = setDelay(alt, givenPosition, lang) * (100.0/getSpeechSpeed());
-	  		/*if(dialogue[givenPosition]['type'] === "Image") {
+	  		console.log("CURRENT DELAY:"+msg_spec['delay']);
+				/*if(dialogue[givenPosition]['type'] === "Image") {
 	  			msg_spec = {};
 	  			msg_spec['content'] = 'Here is an image ![product image](https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80)'
 	  		}*/
@@ -1501,7 +1072,6 @@
 						  }
 						break;
 	  				case "Skip":
-						case "Conditional": //Conditional is the same as skip from the perspective of what follows the text
 	  					console.log("Auto progress message...");
 	  					if(!alt) {
 		  					if (previous_dialogue_position != 0) {
@@ -1537,7 +1107,7 @@
 								'time': time,
 								'timestamp':new Date().getTime()
 							});
-							break 
+							break;
 					case "Confirmation":
 						showActionBar();
 	  					console.log("Confirm type of response..." + givenPosition);
@@ -1573,8 +1143,8 @@
 								'q-answer':res.text
 							}); 
 							
-							console.log("Got value from Confirmation:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+							console.log("Got value from Yes/No:" + res.value); // will print "one" from 'value'
+
 
 
 		  					if (previous_dialogue_position != 0) {
@@ -1586,7 +1156,8 @@
 		  					progressDialogue();
 						});
 						break;
-	  				case "Yes/No":
+	  			case "Yes/No":
+							console.log("-----YES/NO-----")
 	  					showActionBar();
 	  					if(alt) {
 	  						addUtilButtons(givenPosition, true);
@@ -1637,7 +1208,7 @@
 							}); 
 							 
 							console.log("Got value from Yes/No:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+
 
 			  				if (res.text === "Explain") {
 			  					progressDialogue(givenPosition, true);
@@ -1682,8 +1253,6 @@
 							}); 
 
 							console.log("Got value from Input:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
-
 		  					if (previous_dialogue_position != 0) {
 		  						dialogue_position = previous_dialogue_position;
 		  						previous_dialogue_position = 0;
@@ -1694,6 +1263,7 @@
 						});
 						break;
 					case "Options":
+						console.log("-----OPTIONS-----")
 						showActionBar();
 						if(alt) {
 	  						addUtilButtons(givenPosition, true);
@@ -1724,8 +1294,6 @@
 							}); 
 
 							console.log("Got value from Options:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
-
 							//if (!alt) {
 			  					if (previous_dialogue_position != 0) {
 			  						dialogue_position = previous_dialogue_position;
@@ -1787,8 +1355,7 @@
 								'q-answer':res.text
 							}); 
 
-							console.log("Got value from Options-multiple:" + res.value); // will print "one" from 'value'
-							latest_answer = res.value;
+							console.log("Got value from Options:" + res.value); // will print "one" from 'value'
 
 			  				if (res.text === "Explain") {
 			  					progressDialogue(givenPosition, true); 
@@ -1979,24 +1546,18 @@
 	  		if(givenPosition == 0) {
 	  			return 0;
 	  		}
-				
-				if (dialogue[givenPosition - 1]['type'] == "Conditional") {
-					if (latest_answer in dialogue[givenPosition-1]["text"][lang]) {
-						message = dialogue[givenPosition-1]["text"][lang][latest_answer];
-					}
-				} else {
-					if(alt) {
-						message = dialogue[givenPosition - 1]['altText'][lang];
-					} else {
-						message = dialogue[givenPosition - 1]['text'][lang];
-					}
-				}
-				
+	  		if(alt) {
+	  			message = dialogue[givenPosition - 1]['altText'][lang];
+	  		} else {
+	  			message = dialogue[givenPosition - 1]['text'][lang];
+	  		}
+
 				//If we had just text without answer, then wait for user to read
-				if (dialogue[givenPosition - 1]['type'] == "Skip" || dialogue[givenPosition - 1]['type'] == "Conditional") {
-					var length = message.length;
-					var delay;
-					if (length <= 50) {
+				if (dialogue[givenPosition - 1]['type'] == "Skip") {
+					var length = message.split(' ').length;
+					//console.log("MSG LENGTH: "+length);
+					var delay = (length/200)*60*1000;
+					/*if (length <= 50) {
 						delay = 4500;
 					} else if (length > 50 && length <= 100) {
 						delay = 5000;
@@ -2004,15 +1565,23 @@
 						delay = 5500;
 					} else {
 						delay = 8000;
-					}
-					//low = ~50, high ~200					
-					//CREATE FOR LOOP THAT LOOPS THROUGH STRING TO SEE HOW MANY PUNCTUATION MARKS, ADJUST DELAY ACCORDINGLY
+					}*/
+
+					//low = ~50, high ~200
+
 					if (isMuted) { delay = delay - 1500;} // reduces delay if speaking is off
 				//If there was a reply required, then user likely read the question already - no need to wait
 				} else {
-					delay = 500;
+					delay = 1000;
 				}
+	  		
+	  		// 
 
+	  		//CREATE FOR LOOP THAT LOOPS THROUGH STRING TO SEE HOW MANY PUNCTUATION MARKS, ADJUST DELAY ACCORDINGLY
+
+	  		//
+	  		
+	  		
 	  		return delay;
 	  	}
 
@@ -2039,10 +1608,34 @@
 	  		message.id = "message_" + i;
 	  	}
 
+			function setPID() {
+				var pid = document.getElementById('participant_id').value;
+				console.log("PID:"+pid);
+				participant_id = pid;
+
+				document.getElementById('participant_id').style.display = "None";
+				document.getElementById('save_pid_button').style.display = "None";
+				document.getElementById("start_button").style.display = "inline-block";
+
+			}
+
+			function closeConfirmation(e) {
+					e = e || window.event;
+					alert("Trying to leave?");
+
+					// For IE and Firefox prior to version 4
+					if (e) {
+							e.returnValue = 'Sure?';
+					}
+
+					// For Safari
+					return 'Sure?';
+			}
+
     </script>
 
   </head>
-  <body>
+  <body onunload="return closeConfirmation(e);" onpagehide="return closeConfirmation(e);">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
@@ -2087,7 +1680,7 @@
 
 			          <image src="./static/images/bot-selected.png"  id="botLogo" class="pull-left" style="padding-top:10px; height:62px; width: 50px;" > </image>
 			          <div class="classWithPad" >
-				          <h4>Harbor</h4>
+										<h4 id="top_name_tag"></h4>
 
 				      </div>
 				      <div class="pull-right" style="padding-top:15px;">
@@ -2103,27 +1696,33 @@
 	    </nav>
 
            
-            <div class="container-fluid">
+				<div class="container-fluid"> <!-- container -->
 
-		      <!--- Remaining elements -->
-		      <div class="row">
-		        <div class="col-lg-3">
-		        </div>
+					<!--- Remaining elements -->
+					<div class="row"> <!-- ROW -->
+						<div class="col-lg-3">
+						</div>
 
-		        <div class="col-lg-6 text-center">
-		          <button id="start_button" type="button" onclick="return restartDialogue();">Talk to Harbor</button>	  
-		        </div>
-		        <div class="col-lg-3">
-		        	<div id="activity"></div>
-		        
-		        </div>
-		      </div> <!-- /ROW -->
-		    </div> <!-- /container -->		
-			<div class="botui-app-container text-left" id="hello-world" 
-			style="border: 0px solid black; min-width:400px; max-width:500px; width:50%; margin-left:auto; margin-right:auto">
-		            <bot-ui></bot-ui>
-	        </div>	    
-        </div> <!-- /content -->
+						<div class="col-lg-6 text-center">
+							<input id="participant_id" type="input" size="8"></input>
+							<button id="save_pid_button" onclick="return setPID();">Save Participant ID</button> <br />
+							<button id="start_button" style="display:none;" type="button" onclick="return restartDialogue();">Talk to Harbor</button>	  
+							
+						</div>
+						
+						<div class="col-lg-3">
+							<div id="activity"></div>
+						
+						</div> <!-- /COL 3 -->
+						
+					</div> <!-- /ROW -->
+					<div class="botui-app-container text-left" id="hello-world" 
+					style="border: 0px solid black; min-width:400px; max-width:500px; width:50%; margin-left:auto; margin-right:auto">	
+								<bot-ui></bot-ui>
+					</div>
+						
+				</div> <!-- /container -->		
+		    
     </div>
 
     <div class="overlay"></div>
@@ -2155,6 +1754,9 @@
                 $('a[aria-expanded=true]').attr('aria-expanded', 'false');
             });
         });
+
+				window.onbeforeunload = closeConfirmation;
+				window.onunload = closeConfirmation;
     </script>
 
 

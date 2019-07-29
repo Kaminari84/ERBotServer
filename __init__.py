@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import base64
+import hashlib
 
 import time
 import pytz
@@ -97,9 +98,45 @@ setup_app(app)
 def hello_world():
 	return 'Hello, World!'
 
+@app.route('/er_bot_orig')
+def er_bot_orig():
+	return render_template('er_bot_orig.html')
+
 @app.route('/er_bot')
 def er_bot():
 	return render_template('er_bot.html')
+
+@app.route('/d1_bot')
+def d1_bot():
+        return render_template('D1_bot.html')
+
+@app.route('/d2_bot')
+def d2_bot():
+        return render_template('D2_bot.html')
+
+@app.route('/d3_bot')
+def d3_bot():
+        return render_template('D3_bot.html')
+
+@app.route('/d4_bot')
+def d4_bot():
+        return render_template('D4_bot.html')
+
+@app.route('/d5_bot')
+def d5_bot():
+        return render_template('D5_bot.html')
+
+@app.route('/d6_bot')
+def d6_bot():
+        return render_template('D6_bot.html')
+
+@app.route('/er_bot_balanced')
+def er_bot_balanced():
+        return render_template('er_bot_balanced.html')
+
+@app.route('/er_bot_issue_focused')
+def er_bot_issue_focused():
+        return render_template('er_bot_issue_focused.html')
 
 @app.route('/er_bot_get_conversation')
 def er_bot_get_conversation():
@@ -126,7 +163,7 @@ def list_er_bot_conversations():
 
 	conv_ids = {}
 
-	allEvents = EventLog.query.order_by(sqlalchemy.desc(EventLog.timestamp)).limit(50)
+	allEvents = EventLog.query.order_by(sqlalchemy.desc(EventLog.timestamp)).limit(1000)
 	for event in allEvents:
 		logging.info("Conv ID:"+event.conv_id)
 		if event.conv_id not in conv_ids:
@@ -170,6 +207,93 @@ def log_er_event():
 		logging.info("Adding event to log...")
 		db.session.merge(eventLog)
 		db.session.commit()
+
+		#####----- Start constructing new REDCap compatible JSON -----#####
+
+		r_id = hashlib.sha1().hexdigest()[:16]
+		print("Generated RID:" + str(r_id))
+
+		redcap_json = json.loads("{}")
+		redcap_json['conv_id'] = str(conv_id)
+		redcap_json['record_id'] = str(r_id)
+
+		field_map = {
+			"event-type": "event_type",
+			"timestamp": "timestamp",
+			"q-id": "q_id",
+			"q-text": "q_text",
+			"q-alt": "q_alt",
+			"dialogue-position": "dialogue_position",
+			"audio-id": "audio_id",
+			"lang": "lang",
+			"voice": "voice",
+			"speech-speed": "speech_speed",
+			"audio-file": "audio_file",
+			"date": "date",
+			"time": "time",
+			"q-answer-type": "q_answer_type",
+			"q-answer": "q_answer"
+		}
+
+		for s_field, d_field in field_map.items():
+			if s_field in event_data:
+				redcap_json[d_field] = event_data[s_field]
+
+
+		# The redcap entry complete statu checks
+		event_fields = {
+			"q-audio-stopped":['conv_id','timestamp','q_id','q_text','q_alt',
+					'dialogue_position','audio_id'],
+               		"q-audio-play":['conv_id','timestamp','q_id','q_text','q_alt',
+					'dialogue_position','audio_id','lang','voice',
+					'speech_speed','audio_file'],
+               		"q-audio-paused":['conv_id','timestamp','q_id','q_text','q_alt',
+					'dialogue_position','audio_id','audio_file'],
+              		"q-asked":['conv_id','timestamp','q_id','q_text','q_alt','lang','q_answer_type'],
+               		"q-answered":['conv_id','timestamp','q_id','lang','q_answer_type','q_answer'],
+               		"start-conversation":['conv_id','timestamp','date','time'],
+               		"end-conversation":['conv_id','timestamp','date','time']
+			}
+
+		def check_all_fields(redcap_json, event_fields_spec):
+			all_fields = False
+			if 'event_type' in redcap_json:
+				if redcap_json['event_type'] in event_fields_spec:
+					all_fields = True
+					for field_name in event_fields_spec[redcap_json['event_type']]:
+						if field_name not in redcap_json:
+							all_fields = False
+			return all_fields
+
+		# Indicate the completion
+		check_result = check_all_fields(redcap_json, event_fields)
+		if check_result == True:
+			redcap_json['harbor_event_log_complete'] = 2 #0-Incomplete, 1-Unverified, 2-Complere
+		else:
+			redcap_json['harbor_event_log_complete'] = 0
+
+		redcap_text = json.dumps(redcap_json)
+		print("Json Text:" , redcap_text);
+
+
+		#####--------------- Start REDCap event logging --------------#####
+
+		data = {
+    			'token': 'C585B6F067E9AEEE18C399D77960693A',
+    			'content': 'record',
+    			'format': 'json',
+    			'type': 'flat',
+    			'overwriteBehavior': 'normal',
+    			'forceAutoNumber': 'true',
+    			'data': '['+redcap_text+']',
+    			'returnContent': 'auto_ids',
+    			'returnFormat': 'json',
+    			'record_id': str(r_id)
+		}
+		r = requests.post('https://redcap.iths.org/api/', data)
+		logging.info("****Resp from REDCap:" +str(r.text))
+
+		####----------------- End REDCap event logging ----------------####
 
 		json_resp = json.dumps( {'status':'OK', 'conv_id':conv_id, 'event_entry':event_data })
 	else:
