@@ -4,8 +4,6 @@ import json
 import requests
 import base64
 import hashlib
-import re
-import hashlib
 
 import time
 import pytz
@@ -100,45 +98,13 @@ setup_app(app)
 def hello_world():
 	return 'Hello, World!'
 
-@app.route('/er_bot_orig')
-def er_bot_orig():
-	return render_template('er_bot_orig.html')
+@app.route('/test_redcap')
+def test_redcap():
+	return render_template('test_redcap.html')
 
 @app.route('/er_bot')
 def er_bot():
 	return render_template('er_bot.html')
-
-@app.route('/d1_bot')
-def d1_bot():
-        return render_template('D1_bot.html')
-
-@app.route('/d2_bot')
-def d2_bot():
-        return render_template('D2_bot.html')
-
-@app.route('/d3_bot')
-def d3_bot():
-        return render_template('D3_bot.html')
-
-@app.route('/d4_bot')
-def d4_bot():
-        return render_template('D4_bot.html')
-
-@app.route('/d5_bot')
-def d5_bot():
-        return render_template('D5_bot.html')
-
-@app.route('/d6_bot')
-def d6_bot():
-        return render_template('D6_bot.html')
-
-@app.route('/er_bot_balanced')
-def er_bot_balanced():
-        return render_template('er_bot_balanced.html')
-
-@app.route('/er_bot_issue_focused')
-def er_bot_issue_focused():
-        return render_template('er_bot_issue_focused.html')
 
 @app.route('/er_bot_get_conversation')
 def er_bot_get_conversation():
@@ -165,7 +131,7 @@ def list_er_bot_conversations():
 
 	conv_ids = {}
 
-	allEvents = EventLog.query.order_by(sqlalchemy.desc(EventLog.timestamp)).limit(1000)
+	allEvents = EventLog.query.order_by(sqlalchemy.desc(EventLog.timestamp)).limit(10000)
 	for event in allEvents:
 		logging.info("Conv ID:"+event.conv_id)
 		if event.conv_id not in conv_ids:
@@ -210,75 +176,18 @@ def log_er_event():
 		db.session.merge(eventLog)
 		db.session.commit()
 
-		#####----- Start constructing new REDCap compatible JSON -----#####
+		# Add logging to the REDCap
+		# 1) Get the next record ID to add
+		#data = {
+		#	'token': 'C585B6F067E9AEEE18C399D77960693A',
+		#	'content': 'generateNextRecordName'
+		#}
+		#r = requests.post('https://redcap.iths.org/api/', data)
+		#r_id = int(r.text)
+		#logging.info("****New record ID:" +str(r_id))
 
 		r_id = hashlib.sha1().hexdigest()[:16]
-		logging.info("Generated RID:" + str(r_id))
-
-		redcap_json = json.loads("{}")
-		redcap_json['conv_id'] = str(conv_id)
-		redcap_json['record_id'] = str(r_id)
-
-		field_map = {
-			"event-type": "event_type",
-			"timestamp": "timestamp",
-			"q-id": "q_id",
-			"q-text": "q_text",
-			"q-alt": "q_alt",
-			"dialogue-position": "dialogue_position",
-			"audio-id": "audio_id",
-			"lang": "lang",
-			"voice": "voice",
-			"speech-speed": "speech_speed",
-			"audio-file": "audio_file",
-			"date": "date",
-			"time": "time",
-			"q-answer-type": "q_answer_type",
-			"q-answer": "q_answer"
-		}
-
-		for s_field, d_field in field_map.items():
-			if s_field in event_data:
-				redcap_json[d_field] = event_data[s_field]
-
-
-		# The redcap entry complete statu checks
-		event_fields = {
-			"q-audio-stopped":['conv_id','timestamp','q_id','q_text','q_alt',
-					'dialogue_position','audio_id'],
-               		"q-audio-play":['conv_id','timestamp','q_id','q_text','q_alt',
-					'dialogue_position','audio_id','lang','voice',
-					'speech_speed','audio_file'],
-               		"q-audio-paused":['conv_id','timestamp','q_id','q_text','q_alt',
-					'dialogue_position','audio_id','audio_file'],
-              		"q-asked":['conv_id','timestamp','q_id','q_text','q_alt','lang','q_answer_type'],
-               		"q-answered":['conv_id','timestamp','q_id','lang','q_answer_type','q_answer'],
-               		"start-conversation":['conv_id','timestamp','date','time'],
-               		"end-conversation":['conv_id','timestamp','date','time']
-			}
-
-		def check_all_fields(redcap_json, event_fields_spec):
-			all_fields = False
-			if 'event_type' in redcap_json:
-				if redcap_json['event_type'] in event_fields_spec:
-					all_fields = True
-					for field_name in event_fields_spec[redcap_json['event_type']]:
-						if field_name not in redcap_json:
-							all_fields = False
-			return all_fields
-
-		# Indicate the completion
-		check_result = check_all_fields(redcap_json, event_fields)
-		if check_result == True:
-			redcap_json['harbor_event_log_complete'] = 2 #0-Incomplete, 1-Unverified, 2-Complere
-		else:
-			redcap_json['harbor_event_log_complete'] = 0
-
-		redcap_text = json.dumps(redcap_json)
-		logging.info("Json Text:" + str(redcap_text));
-
-
-		#####--------------- Start REDCap event logging --------------#####
+		print("Generated universal ID:" + str(r_id))
 
 		data = {
     			'token': 'C585B6F067E9AEEE18C399D77960693A',
@@ -287,15 +196,13 @@ def log_er_event():
     			'type': 'flat',
     			'overwriteBehavior': 'normal',
     			'forceAutoNumber': 'true',
-    			'data': '['+redcap_text+']',
+    			'data': '[{ "record_id": "'+str(r_id)+'", "user":"Test", "entry":599, "my_first_instrument_complete":2 }]',
     			'returnContent': 'auto_ids',
     			'returnFormat': 'json',
-    			'record_id': str(r_id)
+    			'record_id': hashlib.sha1().hexdigest()[:16]
 		}
 		r = requests.post('https://redcap.iths.org/api/', data)
 		logging.info("****Resp from REDCap:" +str(r.text))
-
-		####----------------- End REDCap event logging ----------------####
 
 		json_resp = json.dumps( {'status':'OK', 'conv_id':conv_id, 'event_entry':event_data })
 	else:
@@ -335,70 +242,44 @@ def tts_request():
 		client_app_guid = 'e0e6613c7f7f4a5dbc06d5ad592895b4'
 		instance_app_guid = '94eb5ccc71344c27ae7ab3fd2e572a52'
 		app_name = 'Test_Speech_Gen'
+		audio_filename = "static/audio/audio_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
 
-		# Construct reusable audio filename
-		logging.info("Constructing reusable audio filename...")
-		hash_object = hashlib.md5(text.encode())
-		text_md5 = hash_object.hexdigest()
-		logging.info("Hashed text:"+text_md5)
-
-		# Encodeing voice
-		p_voice = re.compile(r'\([A-Za-z_,)\- ]+')
-		v_match = p_voice.findall(voice)
-		v_fin = ""
-		if len(v_match) > 0:
-			v_fin = v_match[0].replace('(','').replace(')','').replace(',','').replace(' ','')
-			v_fin = v_fin.replace(lang,'')
-		logging.info("Voice info:"+v_fin)
-
-		audio_filename = "static/audio/audio_v_"+v_fin+"_l_"+lang.replace('-','')+"_s_"+str(speed_reduction)+"_t_"+text_md5+".wav" 
-		#audio_filename = "static/audio/audio_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")+".wav"
-
-		audio_fullpath = os.path.join(app.root_path, audio_filename)
-		logging.info("Audio full path:"+audio_fullpath)
-
-		if os.path.exists(audio_fullpath):
-			logging.info("Audio file already on server, not need to call TTS!")
-			json_resp = json.dumps({"audio_file":audio_filename})
-		else:
-			logging.info("Audio file not on server, calling TTS!")
-
-
-			options = {
-				"http":{
-				}
+		options = {
+			"http":{
 			}
-
-			logging.info("-------REQUEST 1--------")
-			headers = {	'Ocp-Apim-Subscription-Key': str(key),
+		}
+		
+		logging.info("-------REQUEST 1--------")
+		headers = {	'Ocp-Apim-Subscription-Key': str(key),
 					'Content-Length': "0"}
 
-			r = requests.post(url_token, headers=headers)#data = {'key':'value'})
-			logging.info("Status Code:"+str(r.status_code))
-			logging.info("Resp headers:"+str(r.headers))
+		r = requests.post(url_token, headers=headers)#data = {'key':'value'})
+		logging.info("Status Code:"+str(r.status_code))
+		logging.info("Resp headers:"+str(r.headers))
 
-			auth_token = r.content
-			logging.info("Auth Token:"+str(auth_token))
+		auth_token = r.content
+		logging.info("Auth Token:"+str(auth_token))
 
-			#make the request for audio synthesis
 
-			logging.info("-------REQUEST 2--------")
-			#https://stackoverflow.com/questions/45247983/urllib-urlretrieve-with-custom-header
+		#make the request for audio synthesis
 
-			data = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '+ \
-			'xmlns:mstts="http://www.w3.org/2001/mstts" '+ \
-			'xml:lang="'+str(lang)+'">'+ \
-			'<voice xml:lang="'+str(lang)+'" '+ \
-			'name="'+str(voice)+'">'+ \
-			'<prosody pitch="high" rate="-'+speed_reduction+'%">'+ \
-			str(text)+ \
-			'</prosody>' + \
-			'</voice>'+ \
-			'</speak>'
+		logging.info("-------REQUEST 2--------")
+		#https://stackoverflow.com/questions/45247983/urllib-urlretrieve-with-custom-header
 
-			token_base64 = base64.b64encode(auth_token).decode('ascii')
+		data = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '+ \
+		'xmlns:mstts="http://www.w3.org/2001/mstts" '+ \
+		'xml:lang="'+str(lang)+'">'+ \
+		'<voice xml:lang="'+str(lang)+'" '+ \
+		'name="'+str(voice)+'">'+ \
+		'<prosody pitch="high" rate="-'+speed_reduction+'%">'+ \
+		str(text)+ \
+		'</prosody>' + \
+		'</voice>'+ \
+		'</speak>'
 
-			headers = {	'Authorization': "Bearer "+auth_token.decode('ascii'),
+		token_base64 = base64.b64encode(auth_token).decode('ascii')
+
+		headers = {	'Authorization': "Bearer "+auth_token.decode('ascii'),
 					'Content-Type': "application/ssml+xml",
 					'X-Microsoft-OutputFormat': "riff-8khz-8bit-mono-mulaw",
 					'X-Search-AppId': client_app_guid,
@@ -406,29 +287,29 @@ def tts_request():
 					'User-Agent': app_name,
 					'Content-Length': str(len(data))}
 
-			#r2 = requests.post(url_synth, headers=headers, data = json.dumps({'content':data}))
-			req = requests.Request('POST',url_synth, headers=headers, data = data.encode('utf-8'))
-			prepared = req.prepare()
-			pretty_print_POST(prepared)
+		#r2 = requests.post(url_synth, headers=headers, data = json.dumps({'content':data}))
+		req = requests.Request('POST',url_synth, headers=headers, data = data.encode('utf-8'))
+		prepared = req.prepare()
+		pretty_print_POST(prepared)
 
-			s = requests.Session()
-			resp = s.send(prepared)
+		s = requests.Session()
+		resp = s.send(prepared)
 
-			logging.info("Status Code:"+str(resp.status_code))
-			logging.info("Resp headers:"+str(resp.headers))
-			#print("Resp content:"+str(resp.content))
+		logging.info("Status Code:"+str(resp.status_code))
+		logging.info("Resp headers:"+str(resp.headers))
+		#print("Resp content:"+str(resp.content))
 
-			#audio_fullpath = os.path.join(app.root_path, audio_filename)
-			#logging.info("Audio full path:"+audio_fullpath)
-			with open(audio_fullpath, 'wb') as fd:
-				for chunk in resp.iter_content(chunk_size=128):
-					fd.write(chunk)
+		audio_fullpath = os.path.join(app.root_path, audio_filename)
+		logging.info("Audio full path:"+audio_fullpath)
+		with open(audio_fullpath, 'wb') as fd:
+			for chunk in resp.iter_content(chunk_size=128):
+				fd.write(chunk)
 	
-			if resp.status_code == requests.codes.ok:
-				logging.info("TTS request success!!!")
-				json_resp = json.dumps({"audio_file":audio_filename})
-			else:
-				logging.warn("!!!TTS request failed")
+		if resp.status_code == requests.codes.ok:
+			logging.info("TTS request success!!!")
+			json_resp = json.dumps({"audio_file":audio_filename})
+		else:
+			logging.warn("!!!TTS request failed")
 	else:
 		logging.warn("Error, text empty!!!")
 
